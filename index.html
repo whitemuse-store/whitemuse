@@ -3,140 +3,217 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>WhiteMuse</title>
-
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
   <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./icon.png" type="image/png" />
   <link rel="apple-touch-icon" href="./icon.png" />
-  <link rel="icon" href="./icon.png" />
+
+  <title>WhiteMuse</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-<header class="topbar">
-  <div class="brand">
-    <div class="dot"></div>
-    <div>
-      <div class="title">WhiteMuse</div>
-      <div class="subtitle">プロ物撮り品質に寄せる 一括補正</div>
-    </div>
-  </div>
-  <div class="top-actions">
-    <button id="btnInstallHelp" class="ghost">iPhoneに入れる</button>
-    <button id="btnClearLearning" class="ghost danger">学習データ削除</button>
-  </div>
-</header>
-
-<main class="wrap">
-
-<section class="card">
-  <h2>① 写真を選ぶ（最大10枚）</h2>
-
-  <div class="row">
-    <label class="filebtn">
-      <input id="fileInput" type="file" accept="image/*" multiple />
-      <span>写真を選ぶ</span>
-    </label>
-  </div>
-
-  <div class="row">
-    <div class="pill">カテゴリ</div>
-    <select id="category" class="select">
-      <option value="CHANEL">CHANEL</option>
-      <option value="HERMES">HERMES</option>
-      <option value="LOUISVUITTON">LOUIS VUITTON</option>
-      <option value="DIOR">DIOR</option>
-      <option value="GUCCI">GUCCI</option>
-      <option value="PRADA">PRADA</option>
-      <option value="CELINE">CELINE</option>
-      <option value="OTHER">OTHER</option>
-    </select>
-
-    <div class="pill">書き出し</div>
-    <select id="exportPreset" class="select">
-      <option value="WEB">Web用</option>
-      <option value="MERCARI">メルカリ用</option>
-    </select>
-
-    <button id="btnGenerateIcons" class="ghost">仮アイコン生成</button>
-  </div>
-
-  <div id="modelStatus" class="banner warn" hidden>
-    <b>背景除去モデルが見つかりません</b><br>
-    models/u2netp.onnx を配置してください
-  </div>
-
-  <!-- ★ ここが今回の修正ポイント ★ -->
-  <details class="details">
-    <summary>（任意）クラウド高精度モード</summary>
-
-    <div class="row">
-      <label class="switch">
-        <input id="cloudToggle" type="checkbox" />
-        <span>クラウド背景除去を使う（通常OFF）</span>
-      </label>
+  <header class="topbar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="title">WhiteMuse</div>
+        <div class="subtitle">プロ物撮り品質に寄せる “一括補正”</div>
+      </div>
     </div>
 
-    <div class="row">
-      <input
-        id="cloudApiKey"
-        class="input"
-        placeholder="APIキー（未入力なら使われません）"
-      />
+    <div class="top-actions">
+      <button id="btnInstallHelp" class="ghost">iPhoneに入れる</button>
+      <button id="btnClearLearning" class="ghost danger">学習データ削除</button>
     </div>
+  </header>
 
-    <div class="hint">
-      通常は端末内処理でOK。<br>
-      重い端末のみON推奨。
-    </div>
-  </details>
-</section>
+  <main class="wrap">
+    <section class="card">
+      <h2>① 写真を選ぶ（最大10枚）</h2>
+      <div class="row">
+        <label class="filebtn">
+          <input id="fileInput" type="file" accept="image/*" multiple />
+          <span>写真を選ぶ</span>
+        </label>
 
-<section class="card">
-  <h2>② 写真を自動で整える</h2>
-  <input id="strength" type="range" min="0" max="100" value="70" />
-  <div class="btnrow">
-    <button id="btnOneTap" class="primary">ワンタップ補正</button>
-    <button id="btnEdge" class="ghost">輪郭優先</button>
-    <button id="btnShadowWeak" class="ghost">影弱め</button>
-    <button id="btnWhiteStrong" class="ghost">白強め</button>
-  </div>
-
-  <div id="progress" class="progress" hidden>
-    <div class="bar"><div id="barFill" class="fill"></div></div>
-    <div id="barText" class="text">処理中…</div>
-  </div>
-</section>
-
-<section class="card">
-  <h2>⑥ Before / After</h2>
-  <div class="compare">
-    <div id="thumbs" class="thumbs"></div>
-    <div class="viewer">
-      <div class="viewerTop">
-        <div id="selectedName" class="mono"></div>
-        <button id="btnDownloadAll" class="primary">一括書き出し</button>
+        <div class="hint">
+          iPhoneは「写真を撮る/選ぶ」が出ます。<br />
+          10枚まで一気にOK。
+        </div>
       </div>
 
-      <canvas id="beforeCanvas"></canvas>
-      <canvas id="afterCanvas"></canvas>
+      <div class="row">
+        <div class="pill">カテゴリ</div>
+        <select id="category" class="select">
+          <option value="CHANEL">CHANEL</option>
+          <option value="HERMES">HERMES</option>
+          <option value="LOUISVUITTON">LOUISVUITTON</option>
+          <option value="DIOR">DIOR</option>
+          <option value="GUCCI">GUCCI</option>
+          <option value="PRADA">PRADA</option>
+          <option value="CELINE">CELINE</option>
+          <option value="OTHER">OTHER</option>
+        </select>
 
-      <input id="baSlider" type="range" min="0" max="100" value="50" />
-      <div id="tips" class="hint"></div>
-    </div>
-  </div>
-</section>
+        <div class="pill">書き出し</div>
+        <select id="exportPreset" class="select">
+          <option value="WEB">Web用（軽め高画質）</option>
+          <option value="MERCARI">メルカリ用（縦強め/高品質）</option>
+        </select>
 
-<footer class="footer">
-  WhiteMuse / PWA / On-device processing
-</footer>
+        <button id="btnGenerateIcons" class="ghost">仮アイコン生成</button>
+      </div>
 
-</main>
+      <div id="modelStatus" class="banner warn" hidden>
+        <b>背景除去モデルが見つかりません</b><br />
+        「models/u2netp.onnx」を置くと “端末内背景除去” が動きます。
+      </div>
 
-<script src="./app.js"></script>
+      <details class="details">
+        <summary>（任意）クラウド高精度モード（デフォルトOFF）</summary>
+        <div class="row">
+          <label class="switch">
+            <input id="cloudToggle" type="checkbox" />
+            <span>クラウド背景除去を使う（APIキーが必要）</span>
+          </label>
+        </div>
+        <div class="row">
+          <input id="cloudApiKey" class="input" placeholder="APIキー（未入力なら使いません）" />
+        </div>
+        <div class="hint">
+          端末内が重い場合だけONにしてください。プライバシーのため、初期はOFFです。
+        </div>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>② 写真を自動で整える</h2>
+
+      <div class="controls">
+        <div class="control">
+          <div class="label">強さ（0=弱い / 100=しっかり）</div>
+          <input id="strength" type="range" min="0" max="100" value="70" />
+        </div>
+
+        <div class="btnrow">
+          <button id="btnOneTap" class="primary">ワンタップ補正</button>
+          <button id="btnEdge" class="ghost">輪郭優先</button>
+          <button id="btnShadowWeak" class="ghost">影弱め</button>
+          <button id="btnWhiteStrong" class="ghost">白強め</button>
+        </div>
+
+        <div class="hint">
+          操作は「強さ」＋「ワンタップ」だけでOK。必要なら3つの微調整ボタン。
+        </div>
+
+        <div id="progress" class="progress" hidden>
+          <div class="bar"><div id="barFill" class="fill"></div></div>
+          <div id="barText" class="text">準備中…</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>③ 読み取り（OCR）→ ブランド/モデル候補</h2>
+      <div class="row">
+        <button id="btnOcr" class="ghost">OCRで文字を読む（端末内）</button>
+        <div class="hint">タグ/刻印/ロゴ文字を読んで、辞書＋ルールで候補を出します（断定しません）。</div>
+      </div>
+      <div id="ocrOut" class="mono box"></div>
+      <div id="ocrGuide" class="banner" hidden></div>
+    </section>
+
+    <section class="card">
+      <h2>④ サイズ推定（基準物あり）</h2>
+      <div class="row">
+        <label class="switch">
+          <input id="refMode" type="checkbox" />
+          <span>基準物あり（クレカ/定規/A4）で測る</span>
+        </label>
+        <select id="refType" class="select">
+          <option value="CARD">クレジットカード（85.60mm）</option>
+          <option value="A4W">A4 横幅（210mm）</option>
+          <option value="A4H">A4 縦幅（297mm）</option>
+          <option value="RULER100">定規 100mm</option>
+        </select>
+      </div>
+      <div class="hint">
+        ONにしたら、プレビュー画像をタップして「基準物の両端」を2回タップします。
+      </div>
+      <div id="sizeOut" class="mono box"></div>
+    </section>
+
+    <section class="card">
+      <h2>⑤ 出品文を作る（テンプレ臭を減らす：毎回変化）</h2>
+      <div class="row">
+        <div class="pill">モード</div>
+        <select id="copyMode" class="select">
+          <option value="ATTACK">攻め（即売れ）</option>
+          <option value="ELEGANT">上品（富裕層）</option>
+          <option value="AUTO">おまかせ</option>
+        </select>
+        <button id="btnCopy" class="primary">出品文を生成</button>
+      </div>
+
+      <div class="split">
+        <div>
+          <div class="label">通常</div>
+          <textarea id="copyLong" class="ta" rows="10" placeholder="ここに出品文が出ます"></textarea>
+        </div>
+        <div>
+          <div class="label">短め</div>
+          <textarea id="copyShort" class="ta" rows="10" placeholder="短め版が出ます"></textarea>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="btnUsed" class="ghost">この文で出品した</button>
+        <button id="btnSold" class="ghost">売れた</button>
+        <div class="hint">学習は端末内のみ。巨大再学習はしません。</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>⑥ Before / After（比較）</h2>
+      <div class="compare">
+        <div class="thumbs" id="thumbs"></div>
+
+        <div class="viewer">
+          <div class="viewerTop">
+            <div class="pill">選択中</div>
+            <div id="selectedName" class="mono"></div>
+            <div class="spacer"></div>
+            <button id="btnDownloadAll" class="primary">一括書き出し（JPEG）</button>
+          </div>
+
+          <div class="ba">
+            <div class="canvasWrap">
+              <canvas id="beforeCanvas"></canvas>
+              <canvas id="afterCanvas"></canvas>
+
+              <div class="sliderRow">
+                <span>Before</span>
+                <input id="baSlider" type="range" min="0" max="100" value="50" />
+                <span>After</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="tips" class="hint"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="mono">WhiteMuse / PWA / On-device processing</div>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
 </body>
 </html>
