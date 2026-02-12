@@ -1,0 +1,17 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #ffffff;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+#preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
