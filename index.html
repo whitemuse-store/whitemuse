@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>WhiteMuse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background:#f7f7f7;
+      margin:0;
+      padding:12px;
+    }
+    h1 { font-size:20px; margin-bottom:10px; }
+    .card {
+      background:#fff;
+      border-radius:12px;
+      padding:12px;
+      margin-bottom:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    }
+    button {
+      width:100%;
+      padding:14px;
+      font-size:16px;
+      border-radius:10px;
+      border:none;
+      background:#000;
+      color:#fff;
+      margin-top:8px;
+    }
+    input[type="file"] {
+      width:100%;
+      margin-top:8px;
+    }
+    input[type="range"] {
+      width:100%;
+    }
+    textarea {
+      width:100%;
+      height:160px;
+      margin-top:8px;
+      font-size:14px;
+    }
+    select {
+      width:100%;
+      padding:10px;
+      font-size:16px;
+      margin-top:8px;
+    }
+    img {
+      max-width:100%;
+      border-radius:8px;
+      margin-top:8px;
+    }
+    .row {
+      display:flex;
+      gap:8px;
+    }
+    .row img {
+      width:48%;
+    }
+    .small {
+      font-size:12px;
+      color:#666;
+    }
+  </style>
+</head>
+<body>
+
+<h1>WhiteMuse</h1>
+
+<div class="card">
+  <b>① 写真を選ぶ（最大10枚）</b>
+  <input type="file" id="files" accept="image/*" multiple>
+  <div class="small">iPhoneでは「写真を撮る / 選ぶ」が出ます</div>
+</div>
+
+<div class="card">
+  <b>② 写真を自動で整える</b>
+  <div class="small">強さ（0=弱い / 100=しっかり）</div>
+  <input type="range" id="power" min="0" max="100" value="60">
+  <button onclick="processImages()">ワンタップ補正</button>
+  <div id="preview"></div>
+</div>
+
+<div class="card">
+  <b>③ 売れる文章を作る</b>
+  <select id="mode">
+    <option value="aggressive">攻め（即売れ）</option>
+    <option value="elegant">上品（価格維持）</option>
+    <option value="auto">おまかせ</option>
+  </select>
+  <button onclick="generateText()">出品文を生成</button>
+  <textarea id="text"></textarea>
+</div>
+
+<div class="card">
+  <b>④ 学習（任意）</b>
+  <button onclick="markUsed()">この文章で出品した</button>
+  <button onclick="markSold()">売れた</button>
+  <button onclick="clearLearning()" style="background:#666;">学習データ削除</button>
+  <div class="small">※端末内にのみ保存されます</div>
+</div>
+
+<script>
+let processedImages = [];
+
+function processImages() {
+  const files = document.getElementById('files').files;
+  if (!files.length) {
+    alert("写真を選んでください");
+    return;
+  }
+  processedImages = [];
+  const preview = document.getElementById('preview');
+  preview.innerHTML = "";
+
+  [...files].slice(0,10).forEach((file, i) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      const power = document.getElementById('power').value / 100;
+      ctx.globalAlpha = 1;
+      ctx.filter = `contrast(${1+power}) brightness(${1+power/2})`;
+      ctx.drawImage(img,0,0);
+
+      const out = canvas.toDataURL("image/jpeg",0.95);
+      processedImages.push(out);
+
+      const div = document.createElement('div');
+      div.className = "row";
+      div.innerHTML = `
+        <img src="${URL.createObjectURL(file)}">
+        <img src="${out}">
+      `;
+      preview.appendChild(div);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function generateText() {
+  const mode = document.getElementById('mode').value;
+  const learn = JSON.parse(localStorage.getItem("whitemuse_learn") || "{}");
+
+  let tone;
+  if (mode === "aggressive") tone = "すぐに使える魅力を強調";
+  if (mode === "elegant") tone = "落ち着きと品";
+  if (mode === "auto") tone = learn.bestTone || "バランス";
+
+  const text =
+`手に取った瞬間、気分が一段上がる存在感。
+
+写真の通り、全体の印象はとても整っており、実用に問題のあるダメージは見受けられません。
+細かな使用感はありますが、日常使いでも気になりにくい範囲です。
+
+通勤・お出かけ・特別な日にも合わせやすく、
+${tone}を意識してご提案できます。
+
+正規品のみを扱っておりますので、安心してご検討ください。
+
+この機会にぜひ、ご自身の定番として迎えていただければ嬉しいです。`;
+
+  document.getElementById('text').value = text;
+}
+
+function markUsed() {
+  const learn = JSON.parse(localStorage.getItem("whitemuse_learn") || "{}");
+  learn.used = (learn.used || 0) + 1;
+  localStorage.setItem("whitemuse_learn", JSON.stringify(learn));
+  alert("記録しました");
+}
+
+function markSold() {
+  const learn = JSON.parse(localStorage.getItem("whitemuse_learn") || "{}");
+  learn.sold = (learn.sold || 0) + 1;
+  learn.bestTone = document.getElementById('mode').value;
+  localStorage.setItem("whitemuse_learn", JSON.stringify(learn));
+  alert("売れたデータを学習しました");
+}
+
+function clearLearning() {
+  localStorage.removeItem("whitemuse_learn");
+  alert("学習データを削除しました");
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
