@@ -1,93 +1,581 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
   <title>WhiteMuse</title>
   <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-      background: linear-gradient(180deg, #ffffff, #f3f4f6);
-      color: #111827;
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --brand:#6d28d9;
+      --brand2:#8b5cf6;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --r:18px;
     }
-    header {
-      padding: 24px;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+      background:linear-gradient(180deg,#fff,var(--bg));
+      color:var(--text);
     }
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 24px;
+    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 80px}
+    .topbar{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter:saturate(150%) blur(10px);
+      background:rgba(255,255,255,.7);
+      border-bottom:1px solid rgba(229,231,235,.8);
     }
-    .card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    .topbar .inner{max-width:980px;margin:0 auto;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+    .brand{
+      display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px
     }
-    h2 {
-      margin-top: 0;
-      font-size: 18px;
+    .dot{
+      width:14px;height:14px;border-radius:5px;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      box-shadow:0 6px 14px rgba(109,40,217,.25);
     }
-    textarea, input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
-      font-size: 14px;
-      margin-top: 8px;
+    .subtitle{font-size:12px;color:var(--muted);font-weight:600}
+    .pill{
+      font-size:12px;font-weight:700;color:#fff;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      padding:8px 10px;border-radius:999px;
+      display:flex;align-items:center;gap:8px;
+      box-shadow:0 10px 20px rgba(109,40,217,.18);
     }
-    button {
-      margin-top: 16px;
-      padding: 14px 20px;
-      border-radius: 999px;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      background: #111827;
-      color: #ffffff;
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      overflow:hidden;
     }
-    .muted {
-      color: #6b7280;
-      font-size: 12px;
-      margin-top: 8px;
+    .card .hd{
+      padding:14px 14px 10px;
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px
     }
+    .card .hd h2{margin:0;font-size:16px}
+    .card .hd p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+    .card .bd{padding:14px;border-top:1px solid var(--line)}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px 12px;border-radius:12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .btn.primary{
+      color:#fff;border:none;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+    }
+    .btn.ghost{background:transparent}
+    .btn:active{transform:translateY(1px)}
+    label{font-size:12px;color:var(--muted);font-weight:700}
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+    }
+    textarea{min-height:92px;resize:vertical}
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:520px){.cols{grid-template-columns:1fr}}
+    .preview{
+      border:1px dashed #d1d5db;
+      border-radius:14px;
+      padding:12px;
+      background:linear-gradient(180deg,#fff,#fafafa);
+    }
+    .imgbox{
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    .imgbox img{width:100%;height:100%;object-fit:cover}
+    .muted{color:var(--muted);font-size:12px;line-height:1.45}
+    .kpi{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px
+    }
+    .kpi .box{
+      border:1px solid var(--line);
+      border-radius:14px;padding:10px;background:#fff;
+    }
+    .kpi .t{font-size:11px;color:var(--muted);font-weight:800}
+    .kpi .v{font-size:15px;font-weight:900;margin-top:4px}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:#fff;
+    }
+    .item .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .tag{
+      font-size:11px;font-weight:900;
+      padding:6px 10px;border-radius:999px;
+      background:#f3f4f6;color:#111827;border:1px solid #e5e7eb;
+    }
+    .tag.ok{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
+    .tag.warn{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .small{font-size:12px}
+    .hr{height:1px;background:var(--line);margin:10px 0}
+    .footer{
+      position:fixed;left:0;right:0;bottom:0;
+      background:rgba(255,255,255,.9);
+      backdrop-filter: blur(12px);
+      border-top:1px solid rgba(229,231,235,.9);
+      padding:10px 14px;
+    }
+    .footer .inner{max-width:980px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .toast{
+      position:fixed;right:14px;bottom:70px;
+      background:#111827;color:#fff;
+      border-radius:14px;padding:12px 14px;
+      box-shadow:0 20px 40px rgba(0,0,0,.2);
+      display:none;max-width:320px;
+      font-size:12px;line-height:1.4
+    }
+    .toast.show{display:block}
+    .link{color:var(--brand);font-weight:900;text-decoration:none}
   </style>
 </head>
 <body>
-  <header>WhiteMuse</header>
-
-  <main>
-    <div class="card">
-      <h2>① 商品情報</h2>
-      <input placeholder="商品名（例：CHANEL マトラッセ ラムスキン）" />
-      <textarea rows="3" placeholder="状態・特徴を入力"></textarea>
-      <div class="muted">※ 商品そのものはAI生成しません</div>
+  <div class="topbar">
+    <div class="inner">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>
+          <div style="font-size:16px">WhiteMuse</div>
+          <div class="subtitle">プロ物撮り品質に寄せる “一括補正”</div>
+        </div>
+      </div>
+      <div class="pill">
+        <span>v1.0</span>
+        <span class="mono" id="wmId">WM-0001</span>
+      </div>
     </div>
+  </div>
 
-    <div class="card">
-      <h2>② 画像生成（背景のみ）</h2>
-      <textarea rows="2" placeholder="背景指示（例：高級ホテルのラウンジ）"></textarea>
-      <button>背景を生成する（仮）</button>
-    </div>
+  <div class="wrap">
+    <div class="grid">
 
-    <div class="card">
-      <h2>③ 出品文章生成</h2>
-      <textarea rows="3" placeholder="指示（例：富裕層向け／海外向け）"></textarea>
-      <button>文章を生成する（仮）</button>
-    </div>
+      <!-- LEFT: Create -->
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>① 商品を作る（ID・画像・文章）</h2>
+            <p>まずは1商品だけ。迷う操作は全部消してあります。</p>
+          </div>
+          <button class="btn ghost" id="btnReset">リセット</button>
+        </div>
+        <div class="bd">
+          <div class="cols">
+            <div>
+              <label>販路</label>
+              <select id="market">
+                <option value="mercari">メルカリ（即売れ）</option>
+                <option value="yahoo">ヤフオク（上品・高値）</option>
+              </select>
+            </div>
+            <div>
+              <label>商品管理ID（自動）</label>
+              <input id="productId" class="mono" readonly />
+            </div>
+          </div>
 
-    <div class="card">
-      <h2>④ 商品管理</h2>
-      <input value="WM-0001" />
-      <button>同時出品（仮）</button>
+          <div style="margin-top:10px">
+            <label>商品名（例：シャネル マトラッセ ラムスキン）</label>
+            <input id="title" placeholder="例：CHANEL マトラッセ チェーンショルダー ラムスキン 黒" />
+          </div>
+
+          <div class="cols" style="margin-top:10px">
+            <div>
+              <label>状態（短く）</label>
+              <input id="condition" placeholder="例：角スレ少／全体良好／金具小キズ" />
+            </div>
+            <div>
+              <label>付属品</label>
+              <input id="accessories" placeholder="例：箱／保存袋／ギャランティ" />
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <label>画像（実物）</label>
+            <input id="photo" type="file" accept="image/*" />
+            <div class="muted" style="margin-top:6px">
+              ※ 商品はAIに描かせません（ブランド事故ゼロ）。背景だけ整えます。
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <button class="btn primary" id="btnMake">画像＋文章を作る</button>
+            <button class="btn" id="btnCopyText">文章をコピー</button>
+          </div>
+
+          <div class="kpi">
+            <div class="box">
+              <div class="t">画像</div>
+              <div class="v" id="kpiImg">未作成</div>
+            </div>
+            <div class="box">
+              <div class="t">文章</div>
+              <div class="v" id="kpiText">未作成</div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="cols">
+            <div class="preview">
+              <div class="imgbox" id="imgbox">
+                <div class="muted" style="padding:16px;text-align:center">
+                  ここにプレビューが出ます<br/>
+                  （白背景・接地影・自然）
+                </div>
+              </div>
+              <div class="muted" style="margin-top:8px">
+                背景指示（必要な時だけ）例：<span class="mono">高級ホテルのラウンジ背景</span>
+              </div>
+              <input id="bgPrompt" placeholder="背景だけ指示（任意）" style="margin-top:8px" />
+            </div>
+
+            <div>
+              <label>生成された文章</label>
+              <textarea id="desc" placeholder="ここに文章が出ます"></textarea>
+              <div class="muted" style="margin-top:8px">
+                ※ いまはデモ版（ローカル生成）。次のステップでGmail/Replicate連携を“まとめて”入れます。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Multi-list + sold workflow -->
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>② 同時出品（半自動）</h2>
+            <p>出品ページを一気に開く → 売れたら他を取り消す。</p>
+          </div>
+          <span class="tag ok">安全運用</span>
+        </div>
+        <div class="bd">
+          <div class="muted">
+            いまは「リンクを開く」だけの安全版。<br/>
+            将来：Gmail検知 → “売れた”一覧に自動表示。
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <button class="btn primary" id="btnOpenAll">同時出品ページを開く</button>
+            <button class="btn" id="btnMarkSold">売れた（テスト）</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="list" id="soldList">
+            <div class="item">
+              <div class="top">
+                <div style="font-weight:900">売れた通知</div>
+                <span class="tag warn">まだ0件</span>
+              </div>
+              <div class="muted" style="margin-top:6px">
+                ここに「売れた商品（IDつき）」が出ます。<br/>
+                出たら、下のボタンを順に押すだけ。
+              </div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="muted small">
+            管理IDで完全紐付け：<span class="mono" id="wmId2">WM-0001</span><br/>
+            次のゴール：Gmail APIで「売れた通知メール」を検知してここに出す（操作ゼロ）。
+          </div>
+        </div>
+      </div>
+
     </div>
-  </main>
+  </div>
+
+  <div class="footer">
+    <div class="inner">
+      <div class="muted small">
+        ✅ 今日のゴール：<b>1商品を作って</b>「同時出品ページを開く」まで
+      </div>
+      <div class="row">
+        <button class="btn" id="btnNewId">新しいID</button>
+        <button class="btn" id="btnSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- tiny helpers ----
+    const $ = (id)=>document.getElementById(id);
+    const toast = (msg)=>{
+      const t=$("toast"); t.textContent=msg; t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"), 2400);
+    }
+    const pad4 = (n)=>String(n).padStart(4,"0");
+
+    // ---- state ----
+    const state = {
+      seq: 1,
+      id: "WM-0001",
+      lastImageReady: false,
+      lastTextReady: false,
+      lastTitle: "",
+      lastDesc: "",
+    };
+
+    // ---- init ----
+    const applyId = ()=>{
+      $("wmId").textContent = state.id;
+      $("wmId2").textContent = state.id;
+      $("productId").value = state.id;
+    };
+    applyId();
+
+    const setKpi = ()=>{
+      $("kpiImg").textContent = state.lastImageReady ? "作成済" : "未作成";
+      $("kpiText").textContent = state.lastTextReady ? "作成済" : "未作成";
+    };
+    setKpi();
+
+    const saveLocal = ()=>{
+      localStorage.setItem("whitemuse_v1", JSON.stringify(state));
+      toast("保存しました");
+    }
+    const loadLocal = ()=>{
+      const s = localStorage.getItem("whitemuse_v1");
+      if(!s) return;
+      try{
+        const obj = JSON.parse(s);
+        Object.assign(state, obj);
+        applyId();
+        $("title").value = state.lastTitle || "";
+        $("desc").value = state.lastDesc || "";
+        setKpi();
+        toast("前回の状態を読み込みました");
+      }catch(e){}
+    }
+    loadLocal();
+
+    const newId = ()=>{
+      state.seq = (state.seq || 1) + 1;
+      state.id = `WM-${pad4(state.seq)}`;
+      state.lastImageReady = false;
+      state.lastTextReady = false;
+      $("desc").value = "";
+      $("title").value = "";
+      $("condition").value = "";
+      $("accessories").value = "";
+      $("bgPrompt").value = "";
+      $("photo").value = "";
+      $("imgbox").innerHTML = '<div class="muted" style="padding:16px;text-align:center">ここにプレビューが出ます<br/>（白背景・接地影・自然）</div>';
+      applyId();
+      setKpi();
+      toast("新しいIDにしました");
+      saveLocal();
+    };
+
+    $("btnNewId").addEventListener("click", newId);
+    $("btnSave").addEventListener("click", saveLocal);
+    $("btnReset").addEventListener("click", ()=>{
+      if(confirm("入力をリセットしますか？")){
+        newId();
+      }
+    });
+
+    // ---- demo "generate" ----
+    const buildText = ()=>{
+      const market = $("market").value;
+      const title = $("title").value.trim() || "（商品名未入力）";
+      const cond = $("condition").value.trim();
+      const acc = $("accessories").value.trim();
+      const id = state.id;
+
+      const header = market === "mercari"
+        ? `【即購入OK】${title}\n管理ID：${id}\n`
+        : `【出品】${title}\n管理ID：${id}\n`;
+
+      const body = market === "mercari"
+        ? `ご覧いただきありがとうございます。\n人気モデルのためお早めにどうぞ。\n`
+        : `ご覧いただきありがとうございます。\n上品な雰囲気の一品です。\n`;
+
+      const detail = [
+        cond ? `状態：${cond}` : null,
+        acc ? `付属品：${acc}` : null,
+        `※写真は実物です（AIで商品を描きません）`,
+        `※背景はEC向けに整えています`,
+      ].filter(Boolean).join("\n");
+
+      const footer = market === "mercari"
+        ? `\n発送：1〜2日で丁寧に梱包してお送りします。\n`
+        : `\n発送：丁寧に梱包のうえ発送いたします。\n`;
+
+      return `${header}\n${body}\n${detail}\n${footer}`;
+    };
+
+    const makePreviewImage = (file)=>{
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        $("imgbox").innerHTML = "";
+        const img = new Image();
+        img.src = reader.result;
+        img.onload = ()=>{
+          // simple "white background" look by drawing on canvas (demo)
+          const c = document.createElement("canvas");
+          const size = 900;
+          c.width = size; c.height = size;
+          const ctx = c.getContext("2d");
+          // white bg
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0,0,size,size);
+          // fit image
+          const iw = img.width, ih = img.height;
+          const scale = Math.min((size*0.92)/iw, (size*0.92)/ih);
+          const w = iw*scale, h = ih*scale;
+          const x = (size-w)/2, y = (size-h)/2;
+
+          // subtle shadow (contact-ish)
+          ctx.save();
+          ctx.translate(size/2, size/2 + h*0.34);
+          ctx.scale(1, 0.25);
+          ctx.filter = "blur(18px)";
+          ctx.globalAlpha = 0.18;
+          ctx.beginPath();
+          ctx.ellipse(0,0, w*0.38, h*0.16, 0, 0, Math.PI*2);
+          ctx.fillStyle = "#000";
+          ctx.fill();
+          ctx.restore();
+
+          // draw image
+          ctx.globalAlpha = 1;
+          ctx.filter = "none";
+          ctx.drawImage(img, x, y, w, h);
+
+          const out = new Image();
+          out.src = c.toDataURL("image/jpeg", 0.92);
+          out.alt = "preview";
+          $("imgbox").appendChild(out);
+
+          state.lastImageReady = true;
+          setKpi();
+          toast("画像プレビューを作成しました");
+          saveLocal();
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
+    $("btnMake").addEventListener("click", ()=>{
+      const file = $("photo").files && $("photo").files[0];
+      if(!file){
+        toast("画像を選んでください");
+        return;
+      }
+      // image
+      makePreviewImage(file);
+      // text
+      const txt = buildText();
+      $("desc").value = txt;
+      state.lastTextReady = true;
+      state.lastTitle = $("title").value.trim();
+      state.lastDesc = txt;
+      setKpi();
+      toast("文章を生成しました");
+      saveLocal();
+    });
+
+    $("btnCopyText").addEventListener("click", async ()=>{
+      const txt = $("desc").value.trim();
+      if(!txt){ toast("文章がまだありません"); return; }
+      try{
+        await navigator.clipboard.writeText(txt);
+        toast("文章をコピーしました");
+      }catch(e){
+        $("desc").select();
+        toast("コピーできない場合は選択して手動コピーして下さい");
+      }
+    });
+
+    // ---- open listing pages (safe: just open tabs) ----
+    const openAll = ()=>{
+      const id = encodeURIComponent(state.id);
+      const title = encodeURIComponent($("title").value.trim() || "white muse");
+      // NOTE: these are generic entry points; you can replace with your own templates later
+      const urls = [
+        // Mercari listing (user will paste text/images)
+        `https://www.mercari.com/jp/sell/`,
+        // Yahoo Auctions listing
+        `https://auctions.yahoo.co.jp/sell/jp/show/makeitem`,
+        // optional: your own sheet / management
+        `https://whitemuse.onrender.com/?id=${id}&t=${title}`
+      ];
+      urls.forEach(u=>window.open(u, "_blank"));
+      toast("出品ページを開きました");
+    };
+    $("btnOpenAll").addEventListener("click", openAll);
+
+    // ---- sold list (demo) ----
+    const addSold = ()=>{
+      const id = state.id;
+      const title = $("title").value.trim() || "（商品名未入力）";
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="top">
+          <div style="font-weight:900">${title}</div>
+          <span class="tag ok">売れた</span>
+        </div>
+        <div class="muted" style="margin-top:6px">
+          管理ID：<span class="mono">${id}</span><br/>
+          下のボタンを順に押すだけ（取り消しページを開きます）
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" data-act="cancel-mercari">メルカリを取り消す</button>
+          <button class="btn" data-act="cancel-yahoo">ヤフオクを取り消す</button>
+        </div>
+      `;
+      const list = $("soldList");
+      // remove empty placeholder
+      if(list.children.length===1 && list.textContent.includes("まだ0件")){
+        list.innerHTML="";
+      }
+      list.prepend(el);
+
+      el.querySelector('[data-act="cancel-mercari"]').addEventListener("click", ()=>{
+        window.open("https://www.mercari.com/jp/mypage/listings/", "_blank");
+        toast("メルカリの出品一覧を開きました");
+      });
+      el.querySelector('[data-act="cancel-yahoo"]').addEventListener("click", ()=>{
+        window.open("https://auctions.yahoo.co.jp/seller", "_blank");
+        toast("ヤフオクの出品管理を開きました");
+      });
+    };
+    $("btnMarkSold").addEventListener("click", ()=>{
+      addSold();
+      toast("売れた通知（テスト）を追加しました");
+    });
+  </script>
 </body>
 </html>
