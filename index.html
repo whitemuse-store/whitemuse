@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>WhiteMuse</title>
   <style>
     :root{
@@ -12,665 +12,645 @@
       --muted:#6b7280;
       --line:#e5e7eb;
       --brand:#6d28d9;
-      --brand2:#8b5cf6;
-      --shadow:0 10px 30px rgba(0,0,0,.08);
-      --r:18px;
+      --brand2:#7c3aed;
+      --ok:#059669;
+      --warn:#b45309;
+      --err:#b91c1c;
+      --shadow: 0 10px 25px rgba(17,24,39,.08);
+      --radius: 18px;
+      --btnradius: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
-      background:linear-gradient(180deg,#fff,var(--bg));
+      font-family:var(--sans);
+      background:linear-gradient(180deg,#fff 0%, var(--bg) 70%);
       color:var(--text);
     }
-    .wrap{
-      max-width:1200px;
-      margin:24px auto;
-      padding:0 16px 40px;
+    header{
+      position:sticky; top:0; z-index:5;
+      backdrop-filter:saturate(140%) blur(10px);
+      background:rgba(255,255,255,.75);
+      border-bottom:1px solid var(--line);
     }
-    .topbar{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:14px;
-    }
-    .brandmark{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:999px;background:var(--brand);
-      box-shadow:0 0 0 4px rgba(109,40,217,.12);
-    }
-    h1{
-      font-size:20px;
-      margin:0;
-      letter-spacing:.2px;
-    }
-    .sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    .wrap{max-width:1200px;margin:0 auto;padding:16px 16px 40px}
+    .topbar{display:flex;align-items:center;gap:14px;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
+    .title{font-weight:800;letter-spacing:.2px}
+    .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+    .righttools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .pill{
-      padding:8px 12px;
-      border-radius:999px;
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
       border:1px solid var(--line);
       background:#fff;
-      font-size:12px;
-      color:var(--muted);
-      display:flex;
-      align-items:center;
-      gap:8px;
+      font-size:12px;color:var(--muted);
+      box-shadow:0 4px 14px rgba(17,24,39,.05);
     }
-    .pill b{color:var(--text); font-weight:600}
-    .ok{border-color:rgba(16,185,129,.35); color:#065f46; background:rgba(16,185,129,.06)}
-    .ng{border-color:rgba(239,68,68,.35); color:#7f1d1d; background:rgba(239,68,68,.06)}
+    .pill strong{color:var(--text)}
+    .pill.ok{border-color:rgba(5,150,105,.25); color:var(--ok)}
+    .pill.ng{border-color:rgba(185,28,28,.25); color:var(--err)}
     .btn{
-      appearance:none;
-      border:none;
-      border-radius:14px;
-      padding:10px 14px;
-      background:#fff;
       border:1px solid var(--line);
-      box-shadow:none;
-      font-weight:600;
+      background:#fff;
+      padding:10px 12px;
+      border-radius:var(--btnradius);
       cursor:pointer;
-      font-size:13px;
+      font-weight:700;
+      color:var(--text);
+      box-shadow:0 6px 18px rgba(17,24,39,.06);
     }
-    .btn:hover{filter:brightness(.99)}
     .btn:active{transform:translateY(1px)}
     .btn.primary{
-      background:linear-gradient(135deg,var(--brand),var(--brand2));
-      border:none;
-      color:#fff;
-      box-shadow:0 10px 18px rgba(109,40,217,.22);
+      background:linear-gradient(135deg,var(--brand) 0%, var(--brand2) 100%);
+      border-color:transparent;color:#fff;
     }
-    .btn.small{padding:8px 12px; font-size:12px; border-radius:12px}
+    .btn.ghost{background:#fff}
     .grid{
       display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:14px;
-      margin-top:14px;
+      grid-template-columns: 1fr 1fr;
+      gap:18px;
+      margin-top:18px;
     }
     @media (max-width: 980px){
       .grid{grid-template-columns:1fr}
+      .righttools{justify-content:flex-start}
     }
     .card{
       background:var(--card);
       border:1px solid var(--line);
-      border-radius:var(--r);
+      border-radius:var(--radius);
       box-shadow:var(--shadow);
-      overflow:hidden;
+      padding:16px;
     }
-    .card-h{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:14px 14px 10px;
-      border-bottom:1px solid var(--line);
+    .card h2{
+      font-size:16px;margin:0 0 12px;
+      display:flex;align-items:center;gap:10px
     }
-    .card-h h2{
-      font-size:14px;
-      margin:0;
-      letter-spacing:.2px;
+    .hint{font-size:12px;color:var(--muted);font-weight:600}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .field{
+      display:flex;flex-direction:column;gap:6px;
+      margin-bottom:10px;
+      flex:1;
+      min-width: 220px;
     }
-    .card-h .hint{
-      font-size:12px;color:var(--muted);
-    }
-    .card-b{padding:14px}
-    .form{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    .form .full{grid-column:1 / -1}
-    label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin:0 0 6px;
-    }
+    label{font-size:12px;color:var(--muted);font-weight:700}
     input, select, textarea{
       width:100%;
       border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px 12px;
+      border-radius:12px;
+      padding:11px 12px;
+      font-size:14px;
       outline:none;
-      font-size:13px;
       background:#fff;
     }
-    textarea{min-height:96px; resize:vertical}
+    textarea{min-height:88px;resize:vertical}
     .idbox{
-      display:flex; align-items:center; gap:8px;
-      font-size:12px; color:var(--muted);
-    }
-    .idbadge{
-      font-weight:800;
-      letter-spacing:.6px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      color:var(--text);
-    }
-    .btnrow{
-      display:flex;
+      display:flex;align-items:center;justify-content:space-between;
       gap:10px;
-      flex-wrap:wrap;
+      padding:10px 12px;
+      border:1px dashed rgba(109,40,217,.35);
+      background:rgba(109,40,217,.05);
+      border-radius:14px;
+      font-family:var(--mono);
+      font-size:12px;
+    }
+    .actions{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
+    }
+    .seg{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
+    }
+    .seg select{max-width:240px}
+    .previewGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
       margin-top:12px;
     }
-    .split{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
+    @media (max-width: 520px){
+      .previewGrid{grid-template-columns:1fr}
     }
     .ph{
-      border:1px dashed #d1d5db;
+      border:1px dashed var(--line);
       border-radius:16px;
-      background:#fafafa;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      background:linear-gradient(180deg,#fff 0%, #fafafa 100%);
       min-height:220px;
+      display:flex;align-items:center;justify-content:center;
       color:var(--muted);
-      font-size:12px;
-      padding:12px;
-      text-align:center;
       position:relative;
       overflow:hidden;
     }
-    .ph img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      background:#fff;
-    }
-    .tag{
-      position:absolute;
-      top:10px;
-      left:10px;
-      font-size:11px;
-      padding:6px 10px;
+    .ph img{width:100%;height:100%;object-fit:contain;background:#fff}
+    .ph small{
+      position:absolute;top:10px;right:10px;
+      background:#fff;border:1px solid var(--line);
       border-radius:999px;
-      background:rgba(17,24,39,.72);
-      color:#fff;
-      backdrop-filter: blur(6px);
+      padding:6px 10px;font-size:11px;color:var(--muted);
     }
-    .statusline{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin:8px 0 10px;
-      color:var(--muted);
-      font-size:12px;
-    }
-    .toneRow{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
+    .textout{
       margin-top:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      min-height:110px;
+      background:#fff;
+      white-space:pre-wrap;
     }
-    .miniBtnRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .foot{
-      margin-top:14px;
-      padding:12px 14px;
-      border-top:1px solid var(--line);
-      font-size:12px;
-      color:var(--muted);
-      background:#fcfcff;
-    }
-    .tiny{
-      font-size:11px;
-      color:var(--muted);
+    .mini{
+      font-size:12px;color:var(--muted);
       margin-top:8px;
-      line-height:1.4;
     }
-    .toast{
-      position:fixed;
-      bottom:18px;
-      left:50%;
-      transform:translateX(-50%);
-      background:rgba(17,24,39,.92);
-      color:#fff;
-      padding:10px 14px;
-      border-radius:999px;
+    .danger{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(185,28,28,.25);
+      background:rgba(185,28,28,.06);
+      color:#7f1d1d;
       font-size:12px;
-      opacity:0;
-      pointer-events:none;
-      transition:.18s;
+      display:none;
+      white-space:pre-wrap;
     }
-    .toast.show{opacity:1}
+    .footerNote{
+      margin-top:18px;
+      font-size:12px;color:var(--muted)
+    }
+    .tinyBtns{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
+    }
+    .btn.small{padding:9px 10px;font-size:12px;border-radius:12px}
+    .muted{color:var(--muted)}
+    .kbd{
+      font-family:var(--mono);
+      border:1px solid var(--line);
+      border-bottom-width:2px;
+      padding:1px 6px;
+      border-radius:8px;
+      background:#fff;
+      font-size:12px;
+      color:var(--muted);
+    }
   </style>
 </head>
 <body>
+<header>
   <div class="wrap">
     <div class="topbar">
-      <div class="brandmark">
+      <div class="brand">
         <div class="dot"></div>
         <div>
-          <h1>WhiteMuse</h1>
-          <div class="sub">画像生成 / 文章生成 / 商品管理ID / 売れたら取り消し（v1.0）</div>
+          <div class="title">WhiteMuse</div>
+          <div class="subtitle">画像生成 / 文章生成 / 商品管理ID / 売れたら取り消し（v1.0）</div>
         </div>
       </div>
-      <div class="actions">
-        <div id="apiPill" class="pill ng">API: <b id="apiState">NG</b></div>
-        <button class="btn small" id="btnCheck">接続チェック</button>
+
+      <div class="righttools">
+        <div id="apiPill" class="pill ng"><strong>API:</strong> 未確認</div>
+        <button class="btn small" id="btnPing">接続チェック</button>
         <button class="btn small" id="btnReset">リセット</button>
       </div>
     </div>
+  </div>
+</header>
 
-    <div class="grid">
-      <!-- LEFT -->
-      <div class="card">
-        <div class="card-h">
-          <h2>出品セット作成（ここだけ触ればOK）</h2>
-          <div class="idbox">
-            <span class="idbadge" id="wmId">WM-0000</span>
-          </div>
+<div class="wrap">
+  <div class="grid">
+    <div class="card">
+      <h2>出品セット作成 <span class="hint">（ここだけ触ればOK）</span></h2>
+
+      <div class="row">
+        <div class="field">
+          <label>ブランド</label>
+          <select id="brand">
+            <option>CHANEL</option>
+            <option>HERMES</option>
+            <option>LOUIS VUITTON</option>
+            <option>DIOR</option>
+            <option>GUCCI</option>
+            <option>PRADA</option>
+            <option>CELINE</option>
+            <option>FENDI</option>
+            <option>BOTTEGA VENETA</option>
+            <option>OTHERS</option>
+          </select>
         </div>
-        <div class="card-b">
-          <div class="form">
-            <div>
-              <label>ブランド</label>
-              <select id="brand">
-                <option>CHANEL</option>
-                <option>HERMES</option>
-                <option>LOUIS VUITTON</option>
-                <option>DIOR</option>
-                <option>GUCCI</option>
-                <option>CELINE</option>
-                <option>PRADA</option>
-                <option>BOTTEGA VENETA</option>
-                <option>OTHERS</option>
-              </select>
-            </div>
-
-            <div>
-              <label>モデル（例：マトラッセ / ガーデンパーティ / ネヴァーフル）</label>
-              <input id="model" placeholder="例：マトラッセ 25 / ダイアナ / ピコタン 18" />
-            </div>
-
-            <div>
-              <label>色</label>
-              <input id="color" placeholder="例：ブラック / エトゥープ / グレー" />
-            </div>
-
-            <div>
-              <label>素材</label>
-              <input id="material" placeholder="例：ラムスキン / キャビア / トゴ" />
-            </div>
-
-            <div class="full">
-              <label>状態（短く）</label>
-              <input id="condition" placeholder="例：角スレ少 / 型崩れ軽 / 内側汚れ少" />
-            </div>
-
-            <div class="full">
-              <label>追加指示（必要な時だけ）</label>
-              <textarea id="extra" placeholder="例：富裕層向け / 海外向け / 背景は高級ホテルラウンジ風（※商品はAIに描かせない）"></textarea>
-            </div>
-          </div>
-
-          <div class="btnrow">
-            <button class="btn primary" id="btnBoth">① 画像＋文章 まとめて生成</button>
-            <button class="btn" id="btnImg">画像だけ</button>
-            <button class="btn" id="btnTxt">文章だけ</button>
-          </div>
-
-          <div class="toneRow">
-            <div>
-              <label>販路（文章のトーン自動切替）</label>
-              <select id="channel">
-                <option value="mercari">メルカリ（即売れ）</option>
-                <option value="yahoo">ヤフオク（上品・高値）</option>
-                <option value="rakuma">ラクマ（丁寧・安心）</option>
-              </select>
-            </div>
-            <div>
-              <label>同時出品（半自動）</label>
-              <div class="miniBtnRow">
-                <button class="btn small" id="openMercari">メルカリを開く</button>
-                <button class="btn small" id="openYahoo">ヤフオクを開く</button>
-                <button class="btn small" id="openRakuma">ラクマを開く</button>
-              </div>
-              <div class="tiny">※ “開く”だけ（自動投稿はしません）</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="foot">
-          売れた通知（v1.0：手動登録 → 取り消しだけ最短）<br>
-          <span class="tiny">※ Gmail自動検知は v1.1 で実装（今は迷わない最短ルート）</span>
+        <div class="field">
+          <label>モデル（例：マトラッセ / ガーデンパーティ / ネヴァーフル）</label>
+          <input id="model" placeholder="例：マトラッセ 25 / ダイアナ / ピコタンPM" />
         </div>
       </div>
 
-      <!-- RIGHT -->
-      <div class="card">
-        <div class="card-h">
-          <h2>プレビュー</h2>
-          <div class="hint" id="previewState">待機中</div>
+      <div class="row">
+        <div class="field">
+          <label>色</label>
+          <input id="color" placeholder="例：ブラック / エトゥープ / グレー" />
         </div>
-        <div class="card-b">
-          <div class="split">
-            <div class="ph" id="phMain">
-              <div class="tag">画像（白背景EC向け）</div>
-              <div id="phMainText">生成後に表示</div>
-            </div>
-            <div class="ph" id="phBg">
-              <div class="tag">背景アレンジ（必要な時だけ）</div>
-              <div id="phBgText">生成後に表示</div>
-            </div>
-          </div>
-
-          <div class="statusline">
-            <span>生成された文章（コピーして出品欄へ）</span>
-            <span id="genHint"></span>
-          </div>
-          <textarea id="outText" placeholder="ここに文章が出ます"></textarea>
-
-          <div class="btnrow">
-            <button class="btn" id="copyText">文章をコピー</button>
-            <button class="btn" id="copyId">IDをコピー</button>
-          </div>
-
-          <div class="tiny" style="margin-top:10px;">
-            右上の <b>接続チェック</b> で API が生きているか確認できます。<br>
-            画像生成が失敗する場合は、まず <b>API: OK</b> になっているか見てください。
-          </div>
+        <div class="field">
+          <label>素材</label>
+          <input id="material" placeholder="例：ラムスキン / キャビア / トゴ" />
         </div>
+      </div>
+
+      <div class="field">
+        <label>状態（短く）</label>
+        <input id="condition" placeholder="例：角スレ少 / 型崩れ軽 / 内側汚れ少" />
+      </div>
+
+      <div class="field">
+        <label>追加指示（必要な時だけ）</label>
+        <textarea id="extra" placeholder="例：富裕層向け / 海外向け / 背景は高級ホテルラウンジ風（※商品はAIに描かせない）"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>販売（文章のトーン自動切替）</label>
+          <select id="tone">
+            <option value="mercari_fast">メルカリ（即売れ）</option>
+            <option value="mercari_premium">メルカリ（プレミア強め）</option>
+            <option value="yahoo">ヤフオク</option>
+            <option value="rakuma">ラクマ</option>
+            <option value="b2b">BtoB（業者向け）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>同時出品（半自動）</label>
+          <div class="tinyBtns">
+            <button class="btn small" id="openMercari">メルカリを開く</button>
+            <button class="btn small" id="openYahoo">ヤフオクを開く</button>
+            <button class="btn small" id="openRakuma">ラクマを開く</button>
+          </div>
+          <div class="mini">※ “開く” だけ（自動投稿はしません）</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btnAll">① 画像＋文章 まとめて生成</button>
+        <button class="btn" id="btnImg">画像だけ</button>
+        <button class="btn" id="btnText">文章だけ</button>
+      </div>
+
+      <div class="footerNote">
+        ✅ まずは <span class="kbd">接続チェック</span> → <span class="kbd">文章だけ</span> の順に動作確認がおすすめ。<br/>
+        （Render Free は最初だけ少し待つことがあります）
+      </div>
+
+      <div id="errBox" class="danger"></div>
+    </div>
+
+    <div class="card">
+      <h2>プレビュー <span class="hint" id="statusHint">待機中</span></h2>
+
+      <div class="idbox">
+        <div>管理ID：<span id="wmid">WM-0000</span></div>
+        <button class="btn small" id="copyId">IDをコピー</button>
+      </div>
+
+      <div class="previewGrid">
+        <div class="ph" id="ph1">
+          <small>画像（白背景EC / 生成後に表示）</small>
+          <div class="muted">ここに表示</div>
+        </div>
+        <div class="ph" id="ph2">
+          <small>背景アレンジ（必要な時だけ / 生成後に表示）</small>
+          <div class="muted">ここに表示</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;font-weight:800;font-size:13px;color:var(--muted);">
+        生成された文章（コピーして出品欄へ）
+      </div>
+      <div id="textOut" class="textout">ここに文章が出ます</div>
+
+      <div class="actions">
+        <button class="btn" id="copyText">文章をコピー</button>
+      </div>
+
+      <div class="mini">
+        🔧 うまくいかない時は「エラーの赤い箱」に “本当の原因” を出すようにしてあります。<br/>
+        それをそのまま貼ってくれれば一発で直せます。
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">コピーしました</div>
+  <div class="card" style="margin-top:18px">
+    <h2>売れた通知（v1.0：手動登録 → 取り消しだけ最短） <span class="hint">（今は未実装でもOK）</span></h2>
+    <div class="mini">
+      v1.0 では “売れたら取り消し” を最短で入れるため、まずは土台だけ置いてあります。<br/>
+      （ここは後で一気に作ります）
+    </div>
+  </div>
+</div>
 
-  <script>
-    // =========================
-    // 設定（ここ重要）
-    // =========================
-    const API_BASE = "https://whitemuse-api.onrender.com"; // ← あなたのRender API
-    const ENDPOINTS = {
-      health: ["/health", "/ping", "/status"],   // どれか当たればOK表示
-      image:  "/generate-image",
-      text:   "/generate-text",
-      both:   "/generate-both" // あれば使う（無ければ image+text を順に実行）
-    };
+<script>
+/**
+ * ✅ ここだけ超重要
+ * あなたの API の URL（今動いてるやつ）
+ */
+const API_BASE = "https://whitemuse-api.onrender.com"; // ← これで固定
 
-    // =========================
-    // 便利関数
-    // =========================
-    const $ = (id) => document.getElementById(id);
-    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+// ---------- helpers ----------
+const $ = (id) => document.getElementById(id);
+const apiPill = $("apiPill");
+const errBox = $("errBox");
+const statusHint = $("statusHint");
+const textOut = $("textOut");
+const ph1 = $("ph1");
+const ph2 = $("ph2");
 
-    function toast(msg="完了") {
-      const t = $("toast");
-      t.textContent = msg;
-      t.classList.add("show");
-      setTimeout(()=>t.classList.remove("show"), 1200);
-    }
+function showErr(msg){
+  errBox.style.display = "block";
+  errBox.textContent = msg;
+}
+function clearErr(){
+  errBox.style.display = "none";
+  errBox.textContent = "";
+}
+function setHint(t){ statusHint.textContent = t; }
 
-    function newId(){
-      const n = Math.floor(1000 + Math.random()*9000);
-      $("wmId").textContent = `WM-${n}`;
-    }
+function newId(){
+  const n = Math.floor(Math.random()*9000)+1000;
+  return "WM-" + n;
+}
+function setId(id){ $("wmid").textContent = id; }
 
-    function payloadBase(){
-      return {
-        wm_id: $("wmId").textContent,
-        brand: $("brand").value,
-        model: $("model").value.trim(),
-        color: $("color").value.trim(),
-        material: $("material").value.trim(),
-        condition: $("condition").value.trim(),
-        extra: $("extra").value.trim(),
-        channel: $("channel").value,
-        // v1.0思想：商品をAIに描かせない前提（API側で“背景処理/白背景”をやる設計）
-        product_draw_by_ai: false
-      };
-    }
+function resetUI(){
+  clearErr();
+  setHint("待機中");
+  textOut.textContent = "ここに文章が出ます";
+  ph1.innerHTML = '<small>画像（白背景EC / 生成後に表示）</small><div class="muted">ここに表示</div>';
+  ph2.innerHTML = '<small>背景アレンジ（必要な時だけ / 生成後に表示）</small><div class="muted">ここに表示</div>';
+  setId(newId());
+}
 
-    function setApiPill(ok){
-      const pill = $("apiPill");
-      const st = $("apiState");
-      if(ok){
-        pill.classList.remove("ng");
-        pill.classList.add("ok");
-        st.textContent = "OK";
-      }else{
-        pill.classList.remove("ok");
-        pill.classList.add("ng");
-        st.textContent = "NG";
+function payload(){
+  return {
+    id: $("wmid").textContent,
+    brand: $("brand").value,
+    model: $("model").value.trim(),
+    color: $("color").value.trim(),
+    material: $("material").value.trim(),
+    condition: $("condition").value.trim(),
+    extra: $("extra").value.trim(),
+    tone: $("tone").value
+  };
+}
+
+/**
+ * ✅ “どのAPIパスが正解か” がズレても動くように、
+ * いくつかの候補を順番に試します。
+ */
+async function postWithFallback(paths, bodyObj){
+  let lastErr = null;
+
+  for (const p of paths){
+    const url = API_BASE.replace(/\/$/,"") + p;
+    try{
+      const res = await fetch(url, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(bodyObj)
+      });
+
+      // 404/405 は「そのパスが無い」可能性が高いので次へ
+      if (res.status === 404 || res.status === 405){
+        lastErr = new Error(`Not found: ${p} (${res.status})`);
+        continue;
       }
-    }
 
-    function setPreviewState(text){
-      $("previewState").textContent = text;
-    }
+      const text = await res.text();
+      let json = null;
+      try{ json = JSON.parse(text); }catch(e){}
 
-    function setImageTo(containerId, imgSrc){
-      const ph = $(containerId);
-      ph.innerHTML = "";
-      const img = document.createElement("img");
-      img.src = imgSrc;
-      ph.appendChild(img);
-    }
-
-    function normalizeImageFromJson(j){
-      // いろんなAPI返却パターンに対応
-      const cand =
-        j?.image_url || j?.imageUrl || j?.url || j?.output || j?.image || j?.data?.image_url || j?.data?.url;
-      if(!cand) return null;
-
-      // base64っぽい場合
-      if(typeof cand === "string" && cand.startsWith("data:image/")) return cand;
-      if(typeof cand === "string" && cand.length > 300 && !cand.startsWith("http")){
-        return "data:image/png;base64," + cand;
+      if (!res.ok){
+        // 200以外の時は詳細を出す
+        throw new Error(`HTTP ${res.status} @ ${p}\n` + (json ? JSON.stringify(json,null,2) : text));
       }
-      return cand;
-    }
 
-    function normalizeTextFromJson(j){
-      return (
-        j?.text || j?.caption || j?.description || j?.body ||
-        j?.data?.text || j?.data?.caption || j?.data?.description ||
-        ""
-      );
-    }
+      // 成功（JSONで返ればJSON、文字なら文字）
+      return json ?? { ok:true, raw:text };
 
-    async function safeFetchJson(url, options){
-      const res = await fetch(url, options);
-      const ct = res.headers.get("content-type") || "";
-      if(!res.ok){
-        let msg = `HTTP ${res.status}`;
-        try{
-          if(ct.includes("application/json")){
-            const j = await res.json();
-            msg = j?.error || j?.message || msg;
-          }else{
-            const t = await res.text();
-            msg = t?.slice(0,200) || msg;
-          }
-        }catch(e){}
-        throw new Error(msg);
-      }
-      if(ct.includes("application/json")) return await res.json();
-      // JSONじゃない場合も一応
+    }catch(e){
+      lastErr = e;
+      continue;
+    }
+  }
+
+  throw lastErr ?? new Error("API call failed");
+}
+
+/** GET 確認（/ と /health を試す） */
+async function ping(){
+  clearErr();
+  apiPill.className = "pill ng";
+  apiPill.innerHTML = "<strong>API:</strong> 確認中…";
+
+  const candidates = ["/", "/health", "/ping"];
+  let ok = false;
+  let last = null;
+
+  for (const p of candidates){
+    const url = API_BASE.replace(/\/$/,"") + p;
+    try{
+      const res = await fetch(url, { method:"GET" });
       const t = await res.text();
-      try{ return JSON.parse(t); }catch(e){ return { raw: t }; }
+      if (res.ok){
+        ok = true;
+        // “WhiteMuse API is running” でもOK
+        break;
+      } else {
+        last = `HTTP ${res.status} @ ${p}\n${t}`;
+      }
+    }catch(e){
+      last = String(e);
     }
+  }
 
-    // =========================
-    // API 接続チェック（複数候補を順に試す）
-    // =========================
-    async function checkApi(){
-      setPreviewState("接続チェック中…");
-      for(const p of ENDPOINTS.health){
-        try{
-          const url = API_BASE + p;
-          const res = await fetch(url, { method:"GET" });
-          if(res.ok){
-            setApiPill(true);
-            setPreviewState("待機中");
-            return true;
-          }
-        }catch(e){}
-      }
-      // healthが無くても、API自体は動いてる場合があるのでNGは出す
-      setApiPill(false);
-      setPreviewState("待機中");
-      return false;
-    }
+  if (ok){
+    apiPill.className = "pill ok";
+    apiPill.innerHTML = "<strong>API:</strong> OK";
+    return true;
+  }else{
+    apiPill.className = "pill ng";
+    apiPill.innerHTML = "<strong>API:</strong> NG";
+    showErr("APIに接続できません。\n\n" +
+      "・Render Free だと起動に最大50秒かかることがあります\n" +
+      "・少し待ってからもう一度「接続チェック」\n\n" +
+      (last ? ("---- 詳細 ----\n"+last) : "")
+    );
+    return false;
+  }
+}
 
-    // =========================
-    // 生成処理
-    // =========================
-    async function generateImage(){
-      setPreviewState("画像生成中…（少し待ってOK）");
-      const payload = payloadBase();
-      const j = await safeFetchJson(API_BASE + ENDPOINTS.image, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
-      });
-      const img = normalizeImageFromJson(j);
-      if(!img) throw new Error("画像URLが返りませんでした");
-      setImageTo("phMain", img);
-      setPreviewState("待機中");
-      return j;
-    }
+function setImage(el, url){
+  el.innerHTML = '<small>表示中</small><img alt="" />';
+  el.querySelector("img").src = url;
+}
 
-    async function generateText(){
-      setPreviewState("文章生成中…");
-      const payload = payloadBase();
-      const j = await safeFetchJson(API_BASE + ENDPOINTS.text, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
-      });
-      const txt = normalizeTextFromJson(j);
-      if(!txt) throw new Error("文章が返りませんでした");
-      $("outText").value = txt;
-      setPreviewState("待機中");
-      return j;
-    }
+// ---------- actions ----------
+async function runText(){
+  clearErr();
+  setHint("文章生成中…（少し待ってOK）");
 
-    async function generateBoth(){
-      setPreviewState("画像＋文章 生成中…（少し待ってOK）");
-      const payload = payloadBase();
+  // 文章生成の候補パス
+  const paths = [
+    "/generate/text",
+    "/text",
+    "/generateText",
+    "/api/generate/text",
+    "/api/text",
+    "/generate"
+  ];
 
-      // /generate-both があれば優先
-      try{
-        const j = await safeFetchJson(API_BASE + ENDPOINTS.both, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
-        const img = normalizeImageFromJson(j);
-        const txt = normalizeTextFromJson(j);
-        if(img) setImageTo("phMain", img);
-        if(txt) $("outText").value = txt;
-        setPreviewState("待機中");
-        return;
-      }catch(e){
-        // 無い/失敗なら image → text の順で実行
-      }
+  const data = await postWithFallback(paths, { ...payload(), mode:"text" });
 
-      await generateImage();
-      await generateText();
-      setPreviewState("待機中");
-    }
+  // よくある返し方を吸収
+  const out =
+    data.text ||
+    data.description ||
+    data.result ||
+    (data.raw ? String(data.raw) : "");
 
-    // =========================
-    // UIイベント
-    // =========================
-    $("btnCheck").addEventListener("click", async ()=>{
-      try{
-        await checkApi();
-        toast("接続チェック完了");
-      }catch(e){
-        setApiPill(false);
-        toast("接続NG");
-      }
-    });
+  if (!out) throw new Error("文章が空で返ってきました（APIの返却形式が違う可能性）\n" + JSON.stringify(data,null,2));
 
-    $("btnReset").addEventListener("click", ()=>{
-      $("model").value = "";
-      $("color").value = "";
-      $("material").value = "";
-      $("condition").value = "";
-      $("extra").value = "";
-      $("outText").value = "";
-      // 画像枠を戻す
-      $("phMain").innerHTML = `<div class="tag">画像（白背景EC向け）</div><div id="phMainText">生成後に表示</div>`;
-      $("phBg").innerHTML   = `<div class="tag">背景アレンジ（必要な時だけ）</div><div id="phBgText">生成後に表示</div>`;
-      newId();
-      toast("リセット完了");
-    });
+  textOut.textContent = out;
+  setHint("文章生成：完了 ✅");
+}
 
-    $("btnImg").addEventListener("click", async ()=>{
-      try{
-        await generateImage();
-        toast("画像生成OK");
-      }catch(e){
-        alert("画像生成に失敗しました。APIが起動中か確認してください。\n\n詳細: " + e.message);
-      }
-    });
+async function runImage(){
+  clearErr();
+  setHint("画像生成中…（最初だけ少し待つことがあります）");
 
-    $("btnTxt").addEventListener("click", async ()=>{
-      try{
-        await generateText();
-        toast("文章生成OK");
-      }catch(e){
-        alert("文章生成に失敗しました。APIが起動中か確認してください。\n\n詳細: " + e.message);
-      }
-    });
+  // 画像生成の候補パス
+  const paths = [
+    "/generate/image",
+    "/image",
+    "/generateImage",
+    "/api/generate/image",
+    "/api/image",
+    "/generate"
+  ];
 
-    $("btnBoth").addEventListener("click", async ()=>{
-      try{
-        await generateBoth();
-        toast("生成OK");
-      }catch(e){
-        alert("生成に失敗しました。APIが起動中か確認してください。\n\n詳細: " + e.message);
-      }
-    });
+  const data = await postWithFallback(paths, { ...payload(), mode:"image" });
 
-    $("copyText").addEventListener("click", async ()=>{
-      const v = $("outText").value || "";
-      if(!v){ toast("文章が空です"); return; }
-      await navigator.clipboard.writeText(v);
-      toast("文章をコピーしました");
-    });
+  // 返却候補
+  const img1 = data.imageUrl || data.image_url || (data.images && data.images[0]) || data.image;
+  const img2 = data.bgUrl || data.bg_url || (data.images && data.images[1]) || data.background;
 
-    $("copyId").addEventListener("click", async ()=>{
-      const v = $("wmId").textContent;
-      await navigator.clipboard.writeText(v);
-      toast("IDをコピーしました");
-    });
+  if (!img1){
+    throw new Error("画像URLが返ってきませんでした（APIの返却形式が違う可能性）\n" + JSON.stringify(data,null,2));
+  }
 
-    function openUrl(url){ window.open(url, "_blank", "noopener,noreferrer"); }
-    $("openMercari").addEventListener("click", ()=>openUrl("https://www.mercari.com/jp/sell/"));
-    $("openYahoo").addEventListener("click", ()=>openUrl("https://auctions.yahoo.co.jp/sell/jp/show/"));
-    $("openRakuma").addEventListener("click", ()=>openUrl("https://fril.jp/sell"));
+  setImage(ph1, img1);
+  if (img2) setImage(ph2, img2);
 
-    // 初期化
-    newId();
-    // 起動時にチェック（healthが無い場合はNG表示になるが生成は試せる）
-    checkApi().catch(()=>{});
-  </script>
+  setHint("画像生成：完了 ✅");
+}
+
+async function runAll(){
+  clearErr();
+  setHint("まとめて生成中…（少し待ってOK）");
+
+  // まとめ生成の候補パス
+  const paths = [
+    "/generate/all",
+    "/generate/bundle",
+    "/bundle",
+    "/all",
+    "/generateAll",
+    "/api/generate/all",
+    "/api/bundle",
+    "/generate"
+  ];
+
+  const data = await postWithFallback(paths, { ...payload(), mode:"all" });
+
+  const out =
+    data.text ||
+    data.description ||
+    data.resultText ||
+    data.result ||
+    "";
+
+  const img1 = data.imageUrl || data.image_url || (data.images && data.images[0]) || data.image;
+  const img2 = data.bgUrl || data.bg_url || (data.images && data.images[1]) || data.background;
+
+  if (out) textOut.textContent = out;
+  if (img1) setImage(ph1, img1);
+  if (img2) setImage(ph2, img2);
+
+  // どっちも無いときはエラー
+  if (!out && !img1){
+    throw new Error("文章も画像も返ってきませんでした（APIの返却形式が違う可能性）\n" + JSON.stringify(data,null,2));
+  }
+
+  setHint("まとめて生成：完了 ✅");
+}
+
+function copyToClipboard(txt){
+  navigator.clipboard.writeText(txt).catch(()=>{});
+}
+
+// ---------- wire ----------
+$("btnReset").addEventListener("click", resetUI);
+$("btnPing").addEventListener("click", ping);
+
+$("btnText").addEventListener("click", async ()=>{
+  try{
+    const ok = await ping();
+    if(!ok) return;
+    await runText();
+  }catch(e){
+    showErr("文章生成に失敗しました。\n\n---- 詳細 ----\n" + (e && e.message ? e.message : String(e)));
+    setHint("エラー");
+  }
+});
+
+$("btnImg").addEventListener("click", async ()=>{
+  try{
+    const ok = await ping();
+    if(!ok) return;
+    await runImage();
+  }catch(e){
+    showErr("画像生成に失敗しました。\n\n---- 詳細 ----\n" + (e && e.message ? e.message : String(e)));
+    setHint("エラー");
+  }
+});
+
+$("btnAll").addEventListener("click", async ()=>{
+  try{
+    const ok = await ping();
+    if(!ok) return;
+    await runAll();
+  }catch(e){
+    showErr("まとめて生成に失敗しました。\n\n---- 詳細 ----\n" + (e && e.message ? e.message : String(e)));
+    setHint("エラー");
+  }
+});
+
+$("copyText").addEventListener("click", ()=>{
+  copyToClipboard(textOut.textContent || "");
+  setHint("文章をコピーしました ✅");
+  setTimeout(()=>setHint("待機中"), 900);
+});
+$("copyId").addEventListener("click", ()=>{
+  copyToClipboard($("wmid").textContent || "");
+  setHint("IDをコピーしました ✅");
+  setTimeout(()=>setHint("待機中"), 900);
+});
+
+$("openMercari").addEventListener("click", ()=>window.open("https://www.mercari.com/jp/sell/", "_blank"));
+$("openYahoo").addEventListener("click", ()=>window.open("https://auctions.yahoo.co.jp/sell/jp/show/top", "_blank"));
+$("openRakuma").addEventListener("click", ()=>window.open("https://fril.jp/sell", "_blank"));
+
+// 初期化
+resetUI();
+// 最初に一度だけ自動で接続チェック（Renderが寝てたら起きる）
+setTimeout(()=>{ ping(); }, 400);
+</script>
 </body>
 </html>
