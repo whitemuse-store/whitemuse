@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WhiteMuse</title>
   <style>
@@ -23,30 +23,86 @@
       background:linear-gradient(180deg,#fff,var(--bg));
       color:var(--text);
     }
-    header{
-      position:sticky;top:0;z-index:5;
-      backdrop-filter:saturate(140%) blur(10px);
-      background:rgba(255,255,255,.75);
-      border-bottom:1px solid var(--line);
+    .wrap{
+      max-width:1200px;
+      margin:24px auto;
+      padding:0 16px 40px;
     }
     .topbar{
-      max-width:1100px;margin:0 auto;
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
     }
-    .brand{
-      display:flex;align-items:center;gap:10px;
-      font-weight:800;letter-spacing:.3px;
+    .brandmark{
+      display:flex;
+      align-items:center;
+      gap:10px;
     }
-    .dot{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--brand),var(--brand2))}
-    .sub{font-size:12px;color:var(--muted);font-weight:600}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 40px}
+    .dot{
+      width:10px;height:10px;border-radius:999px;background:var(--brand);
+      box-shadow:0 0 0 4px rgba(109,40,217,.12);
+    }
+    h1{
+      font-size:20px;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .pill b{color:var(--text); font-weight:600}
+    .ok{border-color:rgba(16,185,129,.35); color:#065f46; background:rgba(16,185,129,.06)}
+    .ng{border-color:rgba(239,68,68,.35); color:#7f1d1d; background:rgba(239,68,68,.06)}
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:14px;
+      padding:10px 14px;
+      background:#fff;
+      border:1px solid var(--line);
+      box-shadow:none;
+      font-weight:600;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn:hover{filter:brightness(.99)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      border:none;
+      color:#fff;
+      box-shadow:0 10px 18px rgba(109,40,217,.22);
+    }
+    .btn.small{padding:8px 12px; font-size:12px; border-radius:12px}
     .grid{
       display:grid;
       grid-template-columns: 1.1fr .9fr;
       gap:14px;
+      margin-top:14px;
     }
-    @media (max-width: 920px){
+    @media (max-width: 980px){
       .grid{grid-template-columns:1fr}
     }
     .card{
@@ -56,522 +112,565 @@
       box-shadow:var(--shadow);
       overflow:hidden;
     }
-    .card h2{
-      margin:0;
+    .card-h{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       padding:14px 14px 10px;
-      font-size:16px;
       border-bottom:1px solid var(--line);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
     }
-    .card h2 small{color:var(--muted);font-weight:600;font-size:12px}
-    .body{padding:14px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .field{display:flex;flex-direction:column;gap:6px;min-width:220px;flex:1}
-    label{font-size:12px;color:var(--muted);font-weight:700}
-    input, select, textarea{
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px 12px;
+    .card-h h2{
       font-size:14px;
-      outline:none;
-      background:#fff;
+      margin:0;
+      letter-spacing:.2px;
     }
-    textarea{min-height:110px;resize:vertical}
-    .btn{
-      border:none;
-      border-radius:12px;
-      padding:12px 14px;
-      font-weight:800;
-      cursor:pointer;
-      background:linear-gradient(135deg,var(--brand),var(--brand2));
-      color:white;
-      box-shadow:0 8px 18px rgba(109,40,217,.25);
+    .card-h .hint{
+      font-size:12px;color:var(--muted);
     }
-    .btn.secondary{
-      background:#fff;color:var(--text);
-      border:1px solid var(--line);
-      box-shadow:none;
-      font-weight:800;
-    }
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .pill{
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      color:var(--muted);
-      font-weight:800;
-    }
-    .preview{
+    .card-b{padding:14px}
+    .form{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:10px;
     }
-    @media (max-width: 520px){
-      .preview{grid-template-columns:1fr}
-    }
-    .ph{
-      border:1px dashed var(--line);
-      border-radius:16px;
-      padding:12px;
-      min-height:210px;
-      display:flex;align-items:center;justify-content:center;
+    .form .full{grid-column:1 / -1}
+    label{
+      display:block;
+      font-size:12px;
       color:var(--muted);
-      background:linear-gradient(180deg,#fff,#fafafa);
-      text-align:center;
-      font-weight:700;
+      margin:0 0 6px;
     }
-    .imgbox{
+    input, select, textarea{
+      width:100%;
       border:1px solid var(--line);
-      border-radius:16px;
-      overflow:hidden;
+      border-radius:14px;
+      padding:12px 12px;
+      outline:none;
+      font-size:13px;
       background:#fff;
     }
-    .imgbox img{width:100%;display:block}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-    .hr{height:1px;background:var(--line);margin:14px 0}
-    .list{display:flex;flex-direction:column;gap:10px}
-    .item{
+    textarea{min-height:96px; resize:vertical}
+    .idbox{
+      display:flex; align-items:center; gap:8px;
+      font-size:12px; color:var(--muted);
+    }
+    .idbadge{
+      font-weight:800;
+      letter-spacing:.6px;
+      padding:6px 10px;
+      border-radius:999px;
       border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
       background:#fff;
+      color:var(--text);
+    }
+    .btnrow{
       display:flex;
       gap:10px;
-      align-items:flex-start;
-      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-top:12px;
     }
-    .item strong{display:block}
-    .item .meta{color:var(--muted);font-size:12px;font-weight:700;margin-top:4px}
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .tiny{padding:9px 10px;border-radius:12px;font-size:13px}
-    .status{font-size:12px;color:var(--muted);font-weight:800}
-    .ok{color:#059669}
-    .ng{color:#dc2626}
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .ph{
+      border:1px dashed #d1d5db;
+      border-radius:16px;
+      background:#fafafa;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:220px;
+      color:var(--muted);
+      font-size:12px;
+      padding:12px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .ph img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#fff;
+    }
+    .tag{
+      position:absolute;
+      top:10px;
+      left:10px;
+      font-size:11px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(17,24,39,.72);
+      color:#fff;
+      backdrop-filter: blur(6px);
+    }
+    .statusline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:8px 0 10px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .toneRow{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    .miniBtnRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .foot{
+      margin-top:14px;
+      padding:12px 14px;
+      border-top:1px solid var(--line);
+      font-size:12px;
+      color:var(--muted);
+      background:#fcfcff;
+    }
+    .tiny{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:8px;
+      line-height:1.4;
+    }
+    .toast{
+      position:fixed;
+      bottom:18px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(17,24,39,.92);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      font-size:12px;
+      opacity:0;
+      pointer-events:none;
+      transition:.18s;
+    }
+    .toast.show{opacity:1}
   </style>
 </head>
 <body>
-<header>
-  <div class="topbar">
-    <div class="brand">
-      <div class="dot"></div>
-      <div>
-        <div>WhiteMuse</div>
-        <div class="sub">画像生成 / 文章生成 / 商品管理ID / 売れたら取り消し（v1.0）</div>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brandmark">
+        <div class="dot"></div>
+        <div>
+          <h1>WhiteMuse</h1>
+          <div class="sub">画像生成 / 文章生成 / 商品管理ID / 売れたら取り消し（v1.0）</div>
+        </div>
+      </div>
+      <div class="actions">
+        <div id="apiPill" class="pill ng">API: <b id="apiState">NG</b></div>
+        <button class="btn small" id="btnCheck">接続チェック</button>
+        <button class="btn small" id="btnReset">リセット</button>
       </div>
     </div>
-    <div class="row" style="gap:8px;justify-content:flex-end">
-      <span class="pill" id="apiState">API: 未確認</span>
-      <button class="btn secondary tiny" id="btnPing">接続チェック</button>
-      <button class="btn secondary tiny" id="btnReset">リセット</button>
-    </div>
-  </div>
-</header>
 
-<div class="wrap">
-  <div class="grid">
-
-    <!-- Left -->
-    <div class="card">
-      <h2>
-        <span>出品セット作成 <small>（ここだけ触ればOK）</small></span>
-        <span class="pill mono" id="wmid">WM-----</span>
-      </h2>
-      <div class="body">
-        <div class="row">
-          <div class="field">
-            <label>ブランド</label>
-            <select id="brand">
-              <option>CHANEL</option>
-              <option>HERMES</option>
-              <option>LOUIS VUITTON</option>
-              <option>DIOR</option>
-              <option>GUCCI</option>
-              <option>PRADA</option>
-              <option>CELINE</option>
-              <option>OTHER</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>モデル（例：マトラッセ / ガーデンパーティ / ネヴァーフル）</label>
-            <input id="model" placeholder="例：マトラッセ 25 / ダイアナ / ピコタン PM" />
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="card">
+        <div class="card-h">
+          <h2>出品セット作成（ここだけ触ればOK）</h2>
+          <div class="idbox">
+            <span class="idbadge" id="wmId">WM-0000</span>
           </div>
         </div>
-
-        <div class="row">
-          <div class="field">
-            <label>色</label>
-            <input id="color" placeholder="例：ブラック / エトゥープ / グレー" />
-          </div>
-          <div class="field">
-            <label>素材</label>
-            <input id="material" placeholder="例：ラムスキン / キャビア / トゴ" />
-          </div>
-          <div class="field">
-            <label>状態（短く）</label>
-            <input id="condition" placeholder="例：角スレ少 / 型崩れ軽 / 内側汚れ少" />
-          </div>
-        </div>
-
-        <div class="field">
-          <label>追加指示（必要な時だけ）</label>
-          <textarea id="note" placeholder="例：富裕層向け / 海外向け / 背景は高級ホテルラウンジ風（※商品はAIに描かせない）"></textarea>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="row">
-          <button class="btn" id="btnGenAll">① 画像＋文章 まとめて生成</button>
-          <button class="btn secondary" id="btnGenImg">画像だけ</button>
-          <button class="btn secondary" id="btnGenText">文章だけ</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="row">
-          <div class="field">
-            <label>販路（文章のトーン自動切替）</label>
-            <select id="market">
-              <option value="mercari">メルカリ（即売れ）</option>
-              <option value="yahoo">ヤフオク（上品・高値）</option>
-              <option value="rakuma">ラクマ（丁寧）</option>
-              <option value="other">その他（標準）</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>同時出品（半自動）</label>
-            <div class="row" style="gap:8px">
-              <button class="btn secondary tiny" id="btnOpenMercari">メルカリを開く</button>
-              <button class="btn secondary tiny" id="btnOpenYahoo">ヤフオクを開く</button>
-              <button class="btn secondary tiny" id="btnOpenRakuma">ラクマを開く</button>
+        <div class="card-b">
+          <div class="form">
+            <div>
+              <label>ブランド</label>
+              <select id="brand">
+                <option>CHANEL</option>
+                <option>HERMES</option>
+                <option>LOUIS VUITTON</option>
+                <option>DIOR</option>
+                <option>GUCCI</option>
+                <option>CELINE</option>
+                <option>PRADA</option>
+                <option>BOTTEGA VENETA</option>
+                <option>OTHERS</option>
+              </select>
             </div>
-            <div class="status">※ “開く”だけ（自動投稿はしません）</div>
+
+            <div>
+              <label>モデル（例：マトラッセ / ガーデンパーティ / ネヴァーフル）</label>
+              <input id="model" placeholder="例：マトラッセ 25 / ダイアナ / ピコタン 18" />
+            </div>
+
+            <div>
+              <label>色</label>
+              <input id="color" placeholder="例：ブラック / エトゥープ / グレー" />
+            </div>
+
+            <div>
+              <label>素材</label>
+              <input id="material" placeholder="例：ラムスキン / キャビア / トゴ" />
+            </div>
+
+            <div class="full">
+              <label>状態（短く）</label>
+              <input id="condition" placeholder="例：角スレ少 / 型崩れ軽 / 内側汚れ少" />
+            </div>
+
+            <div class="full">
+              <label>追加指示（必要な時だけ）</label>
+              <textarea id="extra" placeholder="例：富裕層向け / 海外向け / 背景は高級ホテルラウンジ風（※商品はAIに描かせない）"></textarea>
+            </div>
+          </div>
+
+          <div class="btnrow">
+            <button class="btn primary" id="btnBoth">① 画像＋文章 まとめて生成</button>
+            <button class="btn" id="btnImg">画像だけ</button>
+            <button class="btn" id="btnTxt">文章だけ</button>
+          </div>
+
+          <div class="toneRow">
+            <div>
+              <label>販路（文章のトーン自動切替）</label>
+              <select id="channel">
+                <option value="mercari">メルカリ（即売れ）</option>
+                <option value="yahoo">ヤフオク（上品・高値）</option>
+                <option value="rakuma">ラクマ（丁寧・安心）</option>
+              </select>
+            </div>
+            <div>
+              <label>同時出品（半自動）</label>
+              <div class="miniBtnRow">
+                <button class="btn small" id="openMercari">メルカリを開く</button>
+                <button class="btn small" id="openYahoo">ヤフオクを開く</button>
+                <button class="btn small" id="openRakuma">ラクマを開く</button>
+              </div>
+              <div class="tiny">※ “開く”だけ（自動投稿はしません）</div>
+            </div>
           </div>
         </div>
 
+        <div class="foot">
+          売れた通知（v1.0：手動登録 → 取り消しだけ最短）<br>
+          <span class="tiny">※ Gmail自動検知は v1.1 で実装（今は迷わない最短ルート）</span>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="card">
+        <div class="card-h">
+          <h2>プレビュー</h2>
+          <div class="hint" id="previewState">待機中</div>
+        </div>
+        <div class="card-b">
+          <div class="split">
+            <div class="ph" id="phMain">
+              <div class="tag">画像（白背景EC向け）</div>
+              <div id="phMainText">生成後に表示</div>
+            </div>
+            <div class="ph" id="phBg">
+              <div class="tag">背景アレンジ（必要な時だけ）</div>
+              <div id="phBgText">生成後に表示</div>
+            </div>
+          </div>
+
+          <div class="statusline">
+            <span>生成された文章（コピーして出品欄へ）</span>
+            <span id="genHint"></span>
+          </div>
+          <textarea id="outText" placeholder="ここに文章が出ます"></textarea>
+
+          <div class="btnrow">
+            <button class="btn" id="copyText">文章をコピー</button>
+            <button class="btn" id="copyId">IDをコピー</button>
+          </div>
+
+          <div class="tiny" style="margin-top:10px;">
+            右上の <b>接続チェック</b> で API が生きているか確認できます。<br>
+            画像生成が失敗する場合は、まず <b>API: OK</b> になっているか見てください。
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Right -->
-    <div class="card">
-      <h2>
-        <span>プレビュー</span>
-        <span class="status" id="busy">待機中</span>
-      </h2>
-      <div class="body">
-        <div class="preview">
-          <div class="imgbox" id="imgABox" style="display:none"><img id="imgA" alt="imageA"></div>
-          <div class="ph" id="imgAph">画像（白背景EC向け）<br><span class="mono">生成後に表示</span></div>
-
-          <div class="imgbox" id="imgBBox" style="display:none"><img id="imgB" alt="imageB"></div>
-          <div class="ph" id="imgBph">背景アレンジ（必要な時だけ）<br><span class="mono">生成後に表示</span></div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="field">
-          <label>生成された文章（コピーして出品欄へ）</label>
-          <textarea id="outText" placeholder="ここに文章が出ます" class="mono"></textarea>
-        </div>
-
-        <div class="row">
-          <button class="btn secondary tiny" id="btnCopyText">文章をコピー</button>
-          <button class="btn secondary tiny" id="btnCopyID">IDをコピー</button>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Bottom: Sold notifications (manual list for v1) -->
-    <div class="card" style="grid-column:1 / -1">
-      <h2>
-        <span>売れた通知（v1.0：手動登録 → 取り消しだけ最短）</span>
-        <span class="status">※ Gmail自動検知は v1.1 で実装（今は迷わない最短ルート）</span>
-      </h2>
-      <div class="body">
-        <div class="row">
-          <div class="field">
-            <label>売れた販路</label>
-            <select id="soldMarket">
-              <option value="mercari">メルカリ</option>
-              <option value="yahoo">ヤフオク</option>
-              <option value="rakuma">ラクマ</option>
-              <option value="other">その他</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>売れた商品管理ID（WM-XXXX）</label>
-            <input id="soldId" placeholder="例：WM-1023" class="mono"/>
-          </div>
-          <div class="field" style="min-width:260px">
-            <label>メモ（任意）</label>
-            <input id="soldMemo" placeholder="例：シャネル マトラッセ 黒" />
-          </div>
-          <div class="field" style="min-width:140px;align-self:flex-end">
-            <button class="btn" id="btnAddSold">売れたを追加</button>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="list" id="soldList"></div>
-        <div class="status" id="soldEmpty">まだ「売れた」はありません。</div>
-      </div>
-    </div>
-
   </div>
-</div>
 
-<script>
-  // === CONFIG ===
-  const API_BASE = "https://whitemuse-api.onrender.com"; // あなたのAPI
-  // =============
+  <div class="toast" id="toast">コピーしました</div>
 
-  const $ = (id)=>document.getElementById(id);
+  <script>
+    // =========================
+    // 設定（ここ重要）
+    // =========================
+    const API_BASE = "https://whitemuse-api.onrender.com"; // ← あなたのRender API
+    const ENDPOINTS = {
+      health: ["/health", "/ping", "/status"],   // どれか当たればOK表示
+      image:  "/generate-image",
+      text:   "/generate-text",
+      both:   "/generate-both" // あれば使う（無ければ image+text を順に実行）
+    };
 
-  // State
-  let currentId = load("wm_current_id") || makeId();
-  let soldItems = load("wm_sold_list") || [];
+    // =========================
+    // 便利関数
+    // =========================
+    const $ = (id) => document.getElementById(id);
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-  function save(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
-  function load(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+    function toast(msg="完了") {
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"), 1200);
+    }
 
-  function makeId(){
-    const n = Math.floor(1000 + Math.random()*9000);
-    return `WM-${n}`;
-  }
-  function setId(id){
-    currentId = id;
-    $("wmid").textContent = id;
-    save("wm_current_id", id);
-  }
+    function newId(){
+      const n = Math.floor(1000 + Math.random()*9000);
+      $("wmId").textContent = `WM-${n}`;
+    }
 
-  function setBusy(t){ $("busy").textContent = t; }
-  function setApiPill(ok){
-    const el = $("apiState");
-    el.textContent = ok ? "API: OK" : "API: 未確認";
-    el.style.color = ok ? "#059669" : "";
-    el.style.borderColor = ok ? "#a7f3d0" : "";
-  }
+    function payloadBase(){
+      return {
+        wm_id: $("wmId").textContent,
+        brand: $("brand").value,
+        model: $("model").value.trim(),
+        color: $("color").value.trim(),
+        material: $("material").value.trim(),
+        condition: $("condition").value.trim(),
+        extra: $("extra").value.trim(),
+        channel: $("channel").value,
+        // v1.0思想：商品をAIに描かせない前提（API側で“背景処理/白背景”をやる設計）
+        product_draw_by_ai: false
+      };
+    }
 
-  async function ping(){
-    setBusy("接続確認中…");
-    try{
-      const r = await fetch(`${API_BASE}/health`, {method:"GET"});
-      if(!r.ok) throw new Error("bad");
-      setApiPill(true);
-      setBusy("待機中");
-      return true;
-    }catch(e){
+    function setApiPill(ok){
+      const pill = $("apiPill");
+      const st = $("apiState");
+      if(ok){
+        pill.classList.remove("ng");
+        pill.classList.add("ok");
+        st.textContent = "OK";
+      }else{
+        pill.classList.remove("ok");
+        pill.classList.add("ng");
+        st.textContent = "NG";
+      }
+    }
+
+    function setPreviewState(text){
+      $("previewState").textContent = text;
+    }
+
+    function setImageTo(containerId, imgSrc){
+      const ph = $(containerId);
+      ph.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = imgSrc;
+      ph.appendChild(img);
+    }
+
+    function normalizeImageFromJson(j){
+      // いろんなAPI返却パターンに対応
+      const cand =
+        j?.image_url || j?.imageUrl || j?.url || j?.output || j?.image || j?.data?.image_url || j?.data?.url;
+      if(!cand) return null;
+
+      // base64っぽい場合
+      if(typeof cand === "string" && cand.startsWith("data:image/")) return cand;
+      if(typeof cand === "string" && cand.length > 300 && !cand.startsWith("http")){
+        return "data:image/png;base64," + cand;
+      }
+      return cand;
+    }
+
+    function normalizeTextFromJson(j){
+      return (
+        j?.text || j?.caption || j?.description || j?.body ||
+        j?.data?.text || j?.data?.caption || j?.data?.description ||
+        ""
+      );
+    }
+
+    async function safeFetchJson(url, options){
+      const res = await fetch(url, options);
+      const ct = res.headers.get("content-type") || "";
+      if(!res.ok){
+        let msg = `HTTP ${res.status}`;
+        try{
+          if(ct.includes("application/json")){
+            const j = await res.json();
+            msg = j?.error || j?.message || msg;
+          }else{
+            const t = await res.text();
+            msg = t?.slice(0,200) || msg;
+          }
+        }catch(e){}
+        throw new Error(msg);
+      }
+      if(ct.includes("application/json")) return await res.json();
+      // JSONじゃない場合も一応
+      const t = await res.text();
+      try{ return JSON.parse(t); }catch(e){ return { raw: t }; }
+    }
+
+    // =========================
+    // API 接続チェック（複数候補を順に試す）
+    // =========================
+    async function checkApi(){
+      setPreviewState("接続チェック中…");
+      for(const p of ENDPOINTS.health){
+        try{
+          const url = API_BASE + p;
+          const res = await fetch(url, { method:"GET" });
+          if(res.ok){
+            setApiPill(true);
+            setPreviewState("待機中");
+            return true;
+          }
+        }catch(e){}
+      }
+      // healthが無くても、API自体は動いてる場合があるのでNGは出す
       setApiPill(false);
-      setBusy("APIに接続できません（あとでOK）");
+      setPreviewState("待機中");
       return false;
     }
-  }
 
-  function gather(){
-    return {
-      id: currentId,
-      brand: $("brand").value.trim(),
-      model: $("model").value.trim(),
-      color: $("color").value.trim(),
-      material: $("material").value.trim(),
-      condition: $("condition").value.trim(),
-      market: $("market").value,
-      note: $("note").value.trim()
-    };
-  }
-
-  function showImage(which, url){
-    if(which === "A"){
-      $("imgA").src = url;
-      $("imgABox").style.display = "block";
-      $("imgAph").style.display = "none";
-    }else{
-      $("imgB").src = url;
-      $("imgBBox").style.display = "block";
-      $("imgBph").style.display = "none";
-    }
-  }
-
-  async function genImage(mode){
-    // mode: "white" or "bg"
-    const payload = gather();
-    setBusy("画像生成中…（少し待ってOK）");
-    try{
-      const r = await fetch(`${API_BASE}/generate-image`,{
+    // =========================
+    // 生成処理
+    // =========================
+    async function generateImage(){
+      setPreviewState("画像生成中…（少し待ってOK）");
+      const payload = payloadBase();
+      const j = await safeFetchJson(API_BASE + ENDPOINTS.image, {
         method:"POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ ...payload, mode })
-      });
-      const data = await r.json();
-      if(!r.ok) throw new Error(data?.error || "error");
-      if(mode === "white") showImage("A", data.imageUrl);
-      else showImage("B", data.imageUrl);
-      setBusy("待機中");
-    }catch(e){
-      alert("画像生成に失敗しました。APIが起動中か確認してください。");
-      setBusy("待機中");
-    }
-  }
-
-  async function genText(){
-    const payload = gather();
-    setBusy("文章生成中…");
-    try{
-      const r = await fetch(`${API_BASE}/generate-text`,{
-        method:"POST",
-        headers: {"Content-Type":"application/json"},
+        headers:{ "Content-Type":"application/json" },
         body: JSON.stringify(payload)
       });
-      const data = await r.json();
-      if(!r.ok) throw new Error(data?.error || "error");
-      $("outText").value = data.text || "";
-      setBusy("待機中");
-    }catch(e){
-      alert("文章生成に失敗しました。APIが起動中か確認してください。");
-      setBusy("待機中");
+      const img = normalizeImageFromJson(j);
+      if(!img) throw new Error("画像URLが返りませんでした");
+      setImageTo("phMain", img);
+      setPreviewState("待機中");
+      return j;
     }
-  }
 
-  async function genAll(){
-    await genImage("white");
-    await genText();
-  }
-
-  function openMarket(m){
-    // ここは “開くだけ”。安全運用（半自動）
-    // 公式URLのみ
-    const map = {
-      mercari: "https://jp.mercari.com/sell",
-      yahoo: "https://auctions.yahoo.co.jp/sell/jp/show/top",
-      rakuma: "https://fril.jp/sell"
-    };
-    window.open(map[m] || "about:blank", "_blank");
-  }
-
-  // Sold list (manual v1)
-  function renderSold(){
-    const list = $("soldList");
-    list.innerHTML = "";
-    if(!soldItems.length){
-      $("soldEmpty").style.display = "block";
-      return;
-    }
-    $("soldEmpty").style.display = "none";
-
-    soldItems.forEach((it, idx)=>{
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
-        <div>
-          <strong class="mono">${it.id}</strong>
-          <div class="meta">${labelMarket(it.market)} / ${escapeHtml(it.memo || "")}</div>
-        </div>
-        <div class="actions">
-          <button class="btn secondary tiny" data-act="open" data-idx="${idx}">他販路を取り消す</button>
-          <button class="btn secondary tiny" data-act="done" data-idx="${idx}">完了（消す）</button>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-
-    list.querySelectorAll("button").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const idx = Number(btn.dataset.idx);
-        const act = btn.dataset.act;
-        const it = soldItems[idx];
-        if(!it) return;
-
-        if(act === "open"){
-          // v1では「取り消しページを開く」だけ
-          // 実際の取り消し操作は販路側で手動（安全）
-          alert("このあと：各販路の出品管理画面を開いて、該当ID（WM-XXXX）を検索して取り消してください。");
-          openMarket("mercari");
-          openMarket("yahoo");
-          openMarket("rakuma");
-        }else if(act === "done"){
-          soldItems.splice(idx,1);
-          save("wm_sold_list", soldItems);
-          renderSold();
-        }
+    async function generateText(){
+      setPreviewState("文章生成中…");
+      const payload = payloadBase();
+      const j = await safeFetchJson(API_BASE + ENDPOINTS.text, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
       });
-    });
-  }
-
-  function labelMarket(m){
-    return ({mercari:"メルカリ", yahoo:"ヤフオク", rakuma:"ラクマ", other:"その他"})[m] || m;
-  }
-  function escapeHtml(s){
-    return (s||"").replace(/[&<>"']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  }
-
-  // Copy helpers
-  async function copyText(t){
-    try{ await navigator.clipboard.writeText(t); }catch(e){ /* ignore */ }
-  }
-
-  // Reset
-  function resetAll(){
-    if(!confirm("入力とプレビューをリセットします。OK？")) return;
-    $("model").value="";
-    $("color").value="";
-    $("material").value="";
-    $("condition").value="";
-    $("note").value="";
-    $("outText").value="";
-    $("imgABox").style.display="none"; $("imgAph").style.display="flex";
-    $("imgBBox").style.display="none"; $("imgBph").style.display="flex";
-    setId(makeId());
-    setApiPill(false);
-    setBusy("待機中");
-  }
-
-  // Init
-  setId(currentId);
-  renderSold();
-
-  $("btnPing").addEventListener("click", ping);
-  $("btnReset").addEventListener("click", resetAll);
-
-  $("btnGenImg").addEventListener("click", ()=>genImage("white"));
-  $("btnGenText").addEventListener("click", genText);
-  $("btnGenAll").addEventListener("click", genAll);
-
-  $("btnOpenMercari").addEventListener("click", ()=>openMarket("mercari"));
-  $("btnOpenYahoo").addEventListener("click", ()=>openMarket("yahoo"));
-  $("btnOpenRakuma").addEventListener("click", ()=>openMarket("rakuma"));
-
-  $("btnCopyText").addEventListener("click", ()=>{
-    copyText($("outText").value || "");
-    alert("文章をコピーしました");
-  });
-  $("btnCopyID").addEventListener("click", ()=>{
-    copyText(currentId);
-    alert("IDをコピーしました");
-  });
-
-  $("btnAddSold").addEventListener("click", ()=>{
-    const id = $("soldId").value.trim();
-    if(!/^WM-\d{4}$/.test(id)){
-      alert("IDは WM-1234 の形で入れてください");
-      return;
+      const txt = normalizeTextFromJson(j);
+      if(!txt) throw new Error("文章が返りませんでした");
+      $("outText").value = txt;
+      setPreviewState("待機中");
+      return j;
     }
-    soldItems.unshift({
-      id,
-      market: $("soldMarket").value,
-      memo: $("soldMemo").value.trim(),
-      createdAt: Date.now()
-    });
-    save("wm_sold_list", soldItems);
-    $("soldId").value="";
-    $("soldMemo").value="";
-    renderSold();
-  });
 
-  // 初回は自動で接続チェック（失敗してもOK）
-  ping();
-</script>
+    async function generateBoth(){
+      setPreviewState("画像＋文章 生成中…（少し待ってOK）");
+      const payload = payloadBase();
+
+      // /generate-both があれば優先
+      try{
+        const j = await safeFetchJson(API_BASE + ENDPOINTS.both, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+        const img = normalizeImageFromJson(j);
+        const txt = normalizeTextFromJson(j);
+        if(img) setImageTo("phMain", img);
+        if(txt) $("outText").value = txt;
+        setPreviewState("待機中");
+        return;
+      }catch(e){
+        // 無い/失敗なら image → text の順で実行
+      }
+
+      await generateImage();
+      await generateText();
+      setPreviewState("待機中");
+    }
+
+    // =========================
+    // UIイベント
+    // =========================
+    $("btnCheck").addEventListener("click", async ()=>{
+      try{
+        await checkApi();
+        toast("接続チェック完了");
+      }catch(e){
+        setApiPill(false);
+        toast("接続NG");
+      }
+    });
+
+    $("btnReset").addEventListener("click", ()=>{
+      $("model").value = "";
+      $("color").value = "";
+      $("material").value = "";
+      $("condition").value = "";
+      $("extra").value = "";
+      $("outText").value = "";
+      // 画像枠を戻す
+      $("phMain").innerHTML = `<div class="tag">画像（白背景EC向け）</div><div id="phMainText">生成後に表示</div>`;
+      $("phBg").innerHTML   = `<div class="tag">背景アレンジ（必要な時だけ）</div><div id="phBgText">生成後に表示</div>`;
+      newId();
+      toast("リセット完了");
+    });
+
+    $("btnImg").addEventListener("click", async ()=>{
+      try{
+        await generateImage();
+        toast("画像生成OK");
+      }catch(e){
+        alert("画像生成に失敗しました。APIが起動中か確認してください。\n\n詳細: " + e.message);
+      }
+    });
+
+    $("btnTxt").addEventListener("click", async ()=>{
+      try{
+        await generateText();
+        toast("文章生成OK");
+      }catch(e){
+        alert("文章生成に失敗しました。APIが起動中か確認してください。\n\n詳細: " + e.message);
+      }
+    });
+
+    $("btnBoth").addEventListener("click", async ()=>{
+      try{
+        await generateBoth();
+        toast("生成OK");
+      }catch(e){
+        alert("生成に失敗しました。APIが起動中か確認してください。\n\n詳細: " + e.message);
+      }
+    });
+
+    $("copyText").addEventListener("click", async ()=>{
+      const v = $("outText").value || "";
+      if(!v){ toast("文章が空です"); return; }
+      await navigator.clipboard.writeText(v);
+      toast("文章をコピーしました");
+    });
+
+    $("copyId").addEventListener("click", async ()=>{
+      const v = $("wmId").textContent;
+      await navigator.clipboard.writeText(v);
+      toast("IDをコピーしました");
+    });
+
+    function openUrl(url){ window.open(url, "_blank", "noopener,noreferrer"); }
+    $("openMercari").addEventListener("click", ()=>openUrl("https://www.mercari.com/jp/sell/"));
+    $("openYahoo").addEventListener("click", ()=>openUrl("https://auctions.yahoo.co.jp/sell/jp/show/"));
+    $("openRakuma").addEventListener("click", ()=>openUrl("https://fril.jp/sell"));
+
+    // 初期化
+    newId();
+    // 起動時にチェック（healthが無い場合はNG表示になるが生成は試せる）
+    checkApi().catch(()=>{});
+  </script>
 </body>
 </html>
