@@ -24,3 +24,6 @@ app.post("/generate", (req, res) => {
 app.listen(PORT, () => {
   console.log(`WhiteMuse API running on ${PORT}`);
 });
+app.get("/", (req, res) => {
+  res.send("WhiteMuse 起動中（ここが見えたら成功）");
+});
