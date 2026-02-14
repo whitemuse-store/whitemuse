@@ -5,38 +5,15 @@ const app = express();
 app.use(express.json({ limit: "2mb" }));
 
 const PORT = process.env.PORT || 3000;
+
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 const REPLICATE_TEXT_VERSION =
   process.env.REPLICATE_TEXT_VERSION || "meta/meta-llama-3-8b-instruct";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function cleanJapaneseOnly(text) {
-  let t = String(text || "")
-    .replace(/\r/g, "")
-    .replace(/\\n/g, "\n");
-
-  // 英語の前置きを強制削除
-  t = t.replace(/^Here is.*?\n+/is, "");
-  t = t.replace(/^Here are.*?\n+/is, "");
-  t = t.replace(/^Below is.*?\n+/is, "");
-  t = t.replace(/^Sure[,\s].*?\n+/is, "");
-
-  // 最初の日本語文字より前を全削除
-  const jp = t.match(/[ぁ-んァ-ン一-龥]/);
-  if (jp && jp.index > 0) t = t.slice(jp.index);
-
-  // Markdown・英語ラベル除去
-  t = t.replace(/\*\*/g, "");
-  t = t.replace(/^Title:\s*/gim, "");
-  t = t.replace(/^Product Description:\s*/gim, "");
-
-  return t.replace(/\n{3,}/g, "\n\n").trim();
-}
-
-// ヘルスチェック
 app.get("/", (_req, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, service: "whitemuse-api", version: "v1.0" });
 });
 
 app.post("/generate", async (req, res) => {
@@ -56,40 +33,66 @@ app.post("/generate", async (req, res) => {
       });
     }
 
-    const systemPrompt = [
-      "あなたは日本のフリマ（メルカリ・ヤフオク）向け出品文の専門家です。",
-      "必ず日本語のみで出力してください。",
-      "英語・前置き・説明文・挨拶は禁止。",
-      "憶測で書かない。不明点は必ず「写真参照」と書く。",
-      "出力形式は以下のみ：",
-      "1) タイトル（1行）",
-      "2) 商品説明（短い見出し＋本文）"
-    ].join("\n");
+    const prompt = `
+あなたは WhiteMuse v1.0（個人専用）のAIオペレーター。
+高級ブランドバッグ・高級腕時計・ジュエリー/アクセサリーをECで最短で売れる状態にする。
 
-    const createResp = await fetch(
-      "https://api.replicate.com/v1/predictions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Token ${REPLICATE_API_TOKEN}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          version: REPLICATE_TEXT_VERSION,
-          input: {
-            system_prompt: systemPrompt,
-            prompt: inputText,
-            max_tokens: 512
-          }
-        })
-      }
-    );
+【絶対禁止】
+・被写体生成、改変、修復、新品化
+・形状、サイズ、縦横比変更
+・トリミング（輪郭抽出による背景分離のみ可）
+・変形、遠近補正
+・回転（0.0°固定）
+・英語の出力
+・前置き、挨拶、感想、まとめ
+
+【必須処理順】
+1. カテゴリ判別（バッグ／腕時計／アクセサリー）
+2. 色系統判別（黒／白・明色／有彩色／メタル）
+3. 素材判別（写真で分かる範囲のみ。不明は不明）
+
+【写真編集指示】
+・背景は白
+・影は極薄の接地影のみ
+・不自然なら影なし
+・被写体サイズと比率は完全維持
+
+【品質チェック】
+形状再現性／素材表現／色正確性／EC適性／不自然さ
+各5段階。低評価は理由と再処理指示を書く。
+
+【出品文】
+日本語のみ。
+写真と矛盾しない。
+不明点は不明と書く。
+
+【出力形式】
+以下4ブロックのみ、順番固定。
+
+1) 写真編集 指示書
+2) 品質チェック
+3) 出品文（タイトル1行＋本文）
+4) 価格・運用
+
+【ユーザー入力】
+${inputText}
+`.trim();
+
+    const createResp = await fetch("https://api.replicate.com/v1/predictions", {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${REPLICATE_API_TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        version: REPLICATE_TEXT_VERSION,
+        input: { prompt }
+      })
+    });
 
     if (!createResp.ok) {
-      return res.status(createResp.status).json({
-        ok: false,
-        error: "Replicate API error"
-      });
+      const t = await createResp.text();
+      return res.status(500).json({ ok: false, error: t });
     }
 
     let prediction = await createResp.json();
@@ -97,39 +100,34 @@ app.post("/generate", async (req, res) => {
 
     while (
       prediction.status !== "succeeded" &&
-      prediction.status !== "failed"
+      prediction.status !== "failed" &&
+      prediction.status !== "canceled"
     ) {
       if (Date.now() - start > 60000) {
-        return res.status(504).json({
-          ok: false,
-          error: "タイムアウト"
-        });
+        return res.status(504).json({ ok: false, error: "タイムアウト" });
       }
       await sleep(1200);
-      const r = await fetch(prediction.urls.get, {
-        headers: {
-          Authorization: `Token ${REPLICATE_API_TOKEN}`
-        }
+      const getResp = await fetch(prediction.urls.get, {
+        headers: { Authorization: `Token ${REPLICATE_API_TOKEN}` }
       });
-      prediction = await r.json();
+      prediction = await getResp.json();
     }
 
     if (prediction.status !== "succeeded") {
       return res.status(500).json({
         ok: false,
-        error: "生成失敗"
+        error: "生成失敗",
+        detail: prediction.error || null
       });
     }
 
     const out = prediction.output;
-    const raw =
+    const result =
       typeof out === "string"
         ? out
         : Array.isArray(out)
         ? out.join("\n")
         : JSON.stringify(out);
-
-    const result = cleanJapaneseOnly(raw);
 
     return res.json({
       ok: true,
