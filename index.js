@@ -9,10 +9,9 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 /*
  WhiteMuse v1.0
- 出品文生成専用API
- ・日本語のみ
- ・英語・前置き・説明文・感想すべて禁止
- ・写真にない情報は書かない
+ 出品文生成専用API（確定版）
+ ・日本語のみをAIに強制
+ ・後処理で文章を壊さない
 */
 
 app.post("/generate", async (req, res) => {
@@ -27,34 +26,27 @@ app.post("/generate", async (req, res) => {
     }
 
     const prompt = `
-あなたは日本のEC（メルカリ・ヤフオク等）で売るための「出品文作成AI」です。
-出力は【日本語のみ】。前置き・説明・感想・英語は禁止。
+あなたは日本のEC（メルカリ・ヤフオク）専用の出品文作成AIです。
 
-【絶対禁止】
-・英語
-・「Here is」「I think」「happy」「help」などの前置き
-・中身のない褒め言葉（高級・美しい等）
-・写真にない情報（素材断定・型番・サイズ数値・付属品追加）
-・推測、憶測
+【絶対ルール】
+・出力は日本語のみ
+・英語・前置き・挨拶・感想は禁止
+・写真にない情報は書かない
+・不明点は「写真参照」と書く
+・事実のみ、簡潔
 
-【入力情報（この情報だけ使用）】
+【入力情報】
 ${inputText}
 
-【必ずこの形式で出力】
+【出力形式】
 ■商品名
 ■ポイント
 ■状態
 ■付属品
 ■注意
 
-【出力ルール】
-・日本語のみ
-・6〜10行程度
-・事実のみ
-・不明点は必ず「写真参照」
-・最後は必ず
-「※状態・サイズは写真参照のうえご判断ください。」
-で締める
+最後は必ず：
+※状態・サイズは写真参照のうえご判断ください。
 `.trim();
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -66,23 +58,27 @@ ${inputText}
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "You are a Japanese EC listing generator." },
+          { role: "system", content: "日本語のEC出品文のみを生成するAIです。" },
           { role: "user", content: prompt }
         ],
-        temperature: 0.2
+        temperature: 0.1
       })
     });
 
     const data = await response.json();
-    const resultText = data.choices?.[0]?.message?.content || "";
+    const resultText = data.choices?.[0]?.message?.content?.trim();
 
-    // 念のため英語を完全排除（保険）
-    const japaneseOnly = resultText.replace(/[A-Za-z]/g, "").trim();
+    if (!resultText) {
+      return res.json({
+        ok: false,
+        error: "生成結果が空でした"
+      });
+    }
 
     return res.json({
       ok: true,
       mode: "text",
-      result: japaneseOnly
+      result: resultText
     });
 
   } catch (error) {
