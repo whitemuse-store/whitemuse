@@ -1,206 +1,130 @@
-/**
- * index.js (Node + Express)
- * - Replicate API を叩くサーバー
- * - 環境変数は REPLICATE_API_TOKEN のみ参照（これでズレが起きません）
- *
- * 必須:
- *   REPLICATE_API_TOKEN = r8_.... (実トークン全文)
- *
- * 任意:
- *   REPLICATE_TEXT_VERSION  = ReplicateのモデルID/バージョン（例: "meta/llama-3.1-8b-instruct" 等）
- *   REPLICATE_IMAGE_VERSION = 画像モデルID（例: "black-forest-labs/flux-2-pro"）
- *   PORT = 10000 (Renderは自動で入ることが多い)
- */
-
 import express from "express";
 import cors from "cors";
+import Replicate from "replicate";
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "25mb" }));
+app.use(express.json({ limit: "1mb" }));
 
-const REPLICATE_API_TOKEN = (process.env.REPLICATE_API_TOKEN || "").trim();
-if (!REPLICATE_API_TOKEN) {
-  console.error("❌ REPLICATE_API_TOKEN が未設定です（RenderのEnvironmentに入れてください）");
-}
+// ここがReplicateの鍵（RenderのEnvironmentに入れてあるやつ）
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN,
+});
 
-const TEXT_VERSION =
-  (process.env.REPLICATE_TEXT_VERSION || "").trim() || "meta/llama-3.1-8b-instruct";
-const IMAGE_VERSION =
-  (process.env.REPLICATE_IMAGE_VERSION || "").trim() || "black-forest-labs/flux-2-pro";
+// 使う文章モデル（RenderのEnvironmentで変えられる）
+const TEXT_MODEL =
+  process.env.REPLICATE_TEXT_MODEL || "meta/meta-llama-3-8b-instruct";
 
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+// 余計なものを落として「タイトル＋本文」だけにする関数
+function extractListing(text) {
+  if (!text) return "";
 
-async function replicateCreatePrediction({ version, input }) {
-  const res = await fetch("https://api.replicate.com/v1/predictions", {
-    method: "POST",
-    headers: {
-      Authorization: `Token ${REPLICATE_API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ version, input }),
-  });
-
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    // Replicate側エラーはそのまま返す（原因特定しやすい）
-    const err = new Error(json?.detail || json?.title || "Replicate error");
-    err.status = res.status;
-    err.payload = json;
-    throw err;
-  }
-  return json;
-}
-
-async function replicateWaitPrediction(prediction, { timeoutMs = 120000 } = {}) {
-  const started = Date.now();
-  let p = prediction;
-
-  while (true) {
-    if (p.status === "succeeded") return p;
-    if (p.status === "failed" || p.status === "canceled") return p;
-
-    if (Date.now() - started > timeoutMs) {
-      const err = new Error("Timeout waiting for prediction");
-      err.status = 504;
-      err.payload = p;
-      throw err;
-    }
-
-    await sleep(900);
-
-    const res = await fetch(p.urls.get, {
-      headers: { Authorization: `Token ${REPLICATE_API_TOKEN}` },
-    });
-    p = await res.json();
-  }
-}
-
-async function withRetry(fn, { tries = 4 } = {}) {
-  let lastErr;
-  for (let i = 0; i < tries; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      lastErr = e;
-      const status = e?.status;
-
-      // 429や一時系はリトライ（指数バックオフ）
-      if (status === 429 || status === 502 || status === 503 || status === 504) {
-        const wait = 1200 * Math.pow(2, i); // 1.2s, 2.4s, 4.8s, 9.6s
-        await sleep(wait);
-        continue;
-      }
-      throw e;
+  // ありがちな余計なJSONっぽい部分を切り落とす（raw/logs/metrics等）
+  // 途中に {"raw": ...} みたいなのが混ざっても、そこから後ろを捨てる
+  const cutKeys = ['"raw"', '"logs"', '"metrics"', '"id"', '"model"', '"version"', '"status"'];
+  for (const k of cutKeys) {
+    const idx = text.indexOf(k);
+    if (idx !== -1) {
+      text = text.slice(0, idx);
     }
   }
-  throw lastErr;
+
+  // TITLE: / DESCRIPTION: 形式を優先して抜く
+  const m = text.match(/TITLE\s*:\s*(.+?)\n+DESCRIPTION\s*:\s*([\s\S]+)$/i);
+  if (m) {
+    const title = m[1].trim();
+    const body = m[2].trim();
+    return `${title}\n\n${body}`.trim();
+  }
+
+  // もしマーカーが崩れてても、とにかく「最初のタイトルっぽい1行 + 残り本文」に整える
+  const lines = text
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  if (lines.length === 0) return "";
+  const title = lines[0];
+  const body = lines.slice(1).join("\n");
+  return `${title}\n\n${body}`.trim();
 }
 
-/**
- * POST /generate
- * body例:
- * {
- *   "mode": "text",
- *   "input": { "text": "シャネルのマトラッセの出品文を作ってください" }
- * }
- *
- * or 画像:
- * {
- *   "mode": "image",
- *   "input": { "prompt": "..." }
- * }
- */
+app.get("/", (_, res) => {
+  res.send("whitemuse-api ok");
+});
+
 app.post("/generate", async (req, res) => {
   try {
-    if (!REPLICATE_API_TOKEN) {
-      return res.status(500).json({
-        ok: false,
-        error: "REPLICATE_API_TOKEN is missing",
-      });
+    if (!process.env.REPLICATE_API_TOKEN) {
+      return res.status(500).json({ ok: false, error: "REPLICATE_API_TOKEN が未設定です" });
     }
 
     const mode = req.body?.mode || "text";
-    const input = req.body?.input || {};
+    const inputText = req.body?.input?.text || "";
 
-    // --- TEXT ---
-    if (mode === "text") {
-      const text = String(input.text || "").trim();
-      if (!text) {
-        return res.status(400).json({ ok: false, error: "input.text is required" });
-      }
-
-      // Replicateに投げる形（モデルにより input のキーは変わるので、最小に寄せます）
-      const version = input.version || TEXT_VERSION;
-
-      const prediction = await withRetry(() =>
-        replicateCreatePrediction({
-          version,
-          input: {
-            prompt: text, // 多くのLLM系は prompt を受ける
-          },
-        })
-      );
-
-      const done = await replicateWaitPrediction(prediction);
-
-      // 出力整形（モデルによって output の型が違うので柔軟に）
-      let result = done.output;
-      if (Array.isArray(result)) result = result.join("");
-      if (result && typeof result === "object") result = JSON.stringify(result);
-
-      return res.json({
-        ok: true,
-        mode: "text",
-        result: String(result ?? ""),
-        raw: done,
-      });
+    if (mode !== "text") {
+      return res.status(400).json({ ok: false, error: "mode は text のみ対応です" });
+    }
+    if (!inputText.trim()) {
+      return res.status(400).json({ ok: false, error: "input.text が空です" });
     }
 
-    // --- IMAGE ---
-    if (mode === "image") {
-      const prompt = String(input.prompt || "").trim();
-      if (!prompt) {
-        return res.status(400).json({ ok: false, error: "input.prompt is required" });
-      }
+    // ✅ ゴール固定ルール（AIへの指示）
+    const systemRules = `
+あなたは出品文作成の専門家です。出力は必ず日本語で、次の形式だけにしてください。
 
-      const version = input.version || IMAGE_VERSION;
+TITLE: （タイトルを1行）
+DESCRIPTION:
+（商品説明本文）
 
-      const prediction = await withRetry(() =>
-        replicateCreatePrediction({
-          version,
-          input: {
-            prompt,
-          },
-        })
-      );
+【絶対禁止】
+- JSON、ログ、raw、metrics、id、model、version、status、英語、前置き、注釈、理由説明
+- 「Here’s」などの導入文
 
-      const done = await replicateWaitPrediction(prediction, { timeoutMs: 180000 });
+【本文に必ず含める】
+- 「写真に写っているものが全てです」
+- 状態は断定しない（不明は「写真をご確認ください」）
+- 返品：すり替え防止のため、原則返品不可（ただし説明と大きく違う場合は相談可）
+`.trim();
 
-      // 画像は output がURL配列になることが多い
-      return res.json({
-        ok: true,
-        mode: "image",
-        output: done.output,
-        raw: done,
-      });
-    }
+    // ユーザーから来た本文（あなたが入力した文章）
+    const userPrompt = `
+以下の情報を元に、売れやすく丁寧な「タイトル＋商品説明」を作成してください。
 
-    return res.status(400).json({ ok: false, error: "mode must be 'text' or 'image'" });
-  } catch (e) {
-    const status = e?.status || 500;
-    return res.status(status).json({
-      ok: false,
-      error: e?.message || "Server error",
-      detail: e?.payload || null,
-      status,
+【入力情報】
+${inputText}
+`.trim();
+
+    // Replicateへ送る（文章生成）
+    const output = await replicate.run(TEXT_MODEL, {
+      input: {
+        prompt: `${systemRules}\n\n${userPrompt}`,
+        max_new_tokens: 650,
+        temperature: 0.6,
+      },
     });
+
+    // Replicateの返り値が配列のこともあるので吸収
+    const rawText = Array.isArray(output) ? output.join("") : String(output);
+
+    // ✅ 最終的に「タイトル＋本文」だけに整形
+    const listing = extractListing(rawText);
+
+    if (!listing) {
+      return res.status(500).json({ ok: false, error: "出力の整形に失敗しました" });
+    }
+
+    // ✅ 返すのはこれだけ（余計なもの返さない）
+    return res.json({ ok: true, mode: "text", result: listing });
+  } catch (e) {
+    const msg = e?.message || String(e);
+    return res.status(500).json({ ok: false, error: msg });
   }
 });
 
-app.get("/health", (_req, res) => res.json({ ok: true }));
-
-const port = process.env.PORT || 10000;
-app.listen(port, () => console.log(`✅ API listening on :${port}`));
+// Renderが使うPORT
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log("server listening on", port);
+});
