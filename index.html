@@ -5,18 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhiteMuse v1.0</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; text-align: center; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        button { background: #000; color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-size: 16px; width: 100%; }
-        #status { margin-top: 20px; font-weight: bold; color: #555; }
-        .result-item { background: #fff; margin-top: 20px; padding: 15px; border-radius: 10px; text-align: left; border: 1px solid #ddd; }
-        img { max-width: 100%; border-radius: 10px; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; text-align: center; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        button { background: #000; color: white; border: none; padding: 18px; border-radius: 35px; cursor: pointer; font-size: 18px; width: 100%; font-weight: bold; }
+        #status { margin: 20px 0; font-size: 14px; color: #666; }
+        .result-item { background: #fff; margin-top: 20px; padding: 15px; border-radius: 15px; text-align: left; border: 1px solid #eee; }
+        .error-item { color: red; background: #fff1f1; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 12px; }
+        img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+        p { line-height: 1.6; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>WhiteMuse v1.0</h1>
-        <p>写真を選択してください（50枚まで）</p>
+        <p>ブランド品を撮影してアップロード</p>
         <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
         <button onclick="document.getElementById('fileInput').click()">📷 写真をアップロード</button>
         <div id="status"></div>
@@ -31,14 +33,10 @@
         fileInput.onchange = async (e) => {
             const files = e.target.files;
             if (files.length === 0) return;
-
-            status.innerText = `${files.length}枚の処理を開始します...`;
+            results.innerHTML = ''; // 前の結果をクリア
             
             for (let i = 0; i < files.length; i++) {
                 status.innerText = `${i + 1} / ${files.length} 枚目を処理中...`;
-                
-                // 画像をネット上のURLに変換する代わりに、今回は簡易的にBase64で送る仕組み
-                // ※本来はS3等が必要ですが、まずは動かすために直送します
                 const base64 = await toBase64(files[i]);
                 
                 try {
@@ -52,14 +50,19 @@
                     if (data.ok) {
                         const item = document.createElement('div');
                         item.className = 'result-item';
-                        item.innerHTML = `<img src="${data.edited_image}"><p>${data.description.replace(/\n/g, '<br>')}</p><hr>`;
+                        item.innerHTML = `<img src="${data.edited_image}"><p>${data.description.replace(/\n/g, '<br>')}</p>`;
                         results.prepend(item);
+                    } else {
+                        throw new Error(data.error || "原因不明のエラー");
                     }
                 } catch (err) {
-                    console.error("エラー:", err);
+                    const errItem = document.createElement('div');
+                    errItem.className = 'error-item';
+                    errItem.innerText = `❌ ${i+1}枚目失敗: ${err.message}`;
+                    results.prepend(errItem);
                 }
             }
-            status.innerText = "すべての処理が完了しました！";
+            status.innerText = "すべての処理が終了しました。";
         };
 
         const toBase64 = file => new Promise((resolve, reject) => {
