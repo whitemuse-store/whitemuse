@@ -6,7 +6,7 @@ const path = require('path');
 const app = express();
 app.use(express.json({ limit: '100mb' }));
 
-// あなたが用意した正しい鍵（r8_R0a...）を使って動かします
+// あなたの新しい鍵（r8_R0a..）が、RenderのEnvironmentに正しく入っていれば動きます
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -17,21 +17,23 @@ app.post('/api/process', async (req, res) => {
     const { image_url, bg_type } = req.body;
     let editedImage;
 
+    // 【重要】バージョン番号を指定せず、モデル名だけで呼び出す形式に変更しました
     if (bg_type === 'white') {
-      // 【最新】最も安定している背景削除ツール（lucataco版）
-      editedImage = await replicate.run(
-        "lucataco/remove-bg:95fcc2a21d565684d2a43a8b5d4bc46197e33da0c68230a5ca54bc7030ce8741",
+      // 白背景にする
+      const output = await replicate.run(
+        "lucataco/remove-bg", // バージョン番号をあえて書かないことで最新を使わせます
         { input: { image: image_url } }
       );
+      editedImage = output;
     } else {
-      // 【最新】背景を別のものに変えるツール（logerzz版の最新）
-      editedImage = await replicate.run(
-        "logerzz/background-remover:77227ca3d052d91b40974955f1f9e9f694a50b8ef2f1e63a34a7428f55364842",
+      // 背景を変える
+      const output = await replicate.run(
+        "logerzz/background-remover",
         { input: { image: image_url, background_prompt: bg_type } }
       );
+      editedImage = output;
     }
 
-    // 鑑定執筆（Gemini 2.0 Flash）
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent([
       "ブランド鑑定士として分析し、詳細と推定価格を日本語で出力してください。",
@@ -41,11 +43,11 @@ app.post('/api/process', async (req, res) => {
     res.json({ ok: true, edited_image: editedImage, description: result.response.text() });
 
   } catch (error) {
-    console.error("エラー:", error);
-    // 何が起きたかより分かりやすく表示するようにしました
-    res.status(500).json({ ok: false, error: "道具の番号を確認中: " + error.message });
+    console.error(error);
+    // エラーが起きた場合、その原因を画面にハッキリ出します
+    res.status(500).json({ ok: false, error: "エラーが発生しました: " + error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`WhiteMuse 最終起動完了`));
+app.listen(PORT, () => console.log(`WhiteMuse 最終起動`));
