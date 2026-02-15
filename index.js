@@ -4,7 +4,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const path = require('path');
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
+// 50枚の一括処理に耐えられるよう、データの通り道を広げます
+app.use(express.json({ limit: '100mb' }));
 
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -18,15 +19,14 @@ app.post('/api/process', async (req, res) => {
     const { image_url } = req.body;
     if (!image_url) throw new Error("画像が届いていません");
 
-    // 1. 背景削除 (最新の安定版ツールに変更)
-    // 職人AIが背景を真っ白にします
+    // 1. 【背景削除】最新かつ非常に安定した公式モデルを使用
+    // 被写体の輪郭を正確に残し、背景を透過・白化します
     const editedImage = await replicate.run(
-      "cjwbw/rembg:fb8a3575979bc0319ca0f2a74c760b7d34cc8ec6c7475f4d455e9664c39179f8",
+      "lucataco/remove-bg:95fcc2a21d565684d2a43a8b5d4bc46197e33da0c68230a5ca54bc7030ce8741",
       { input: { image: image_url } }
     );
 
-    // 2. 鑑定・執筆 (Gemini 2.0 Flash)
-    // 爆速で正確な日本語を書きます
+    // 2. 【鑑定・執筆】Gemini 2.0 Flash
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const base64Data = image_url.split(',')[1];
     
@@ -34,17 +34,23 @@ app.post('/api/process', async (req, res) => {
     【鑑定】ブランド名、モデル名、素材、色
     【出品文】プロらしい上品な紹介文（使用感があれば正直に）
     【推定価格】現在の市場相場に基づく価格帯
-    ※「被写体を変えない」ルールに基づき、見たままを誠実に記述してください。`;
+    ※誠実に、見たままを記述してください。`;
 
     const result = await model.generateContent([
       prompt,
       { inlineData: { mimeType: "image/jpeg", data: base64Data } }
     ]);
 
-    res.json({ ok: true, edited_image: editedImage, description: result.response.text() });
+    res.json({ 
+      ok: true, 
+      edited_image: editedImage, 
+      description: result.response.text() 
+    });
+
   } catch (error) {
-    console.error("エラー詳細:", error);
-    res.status(500).json({ ok: false, error: "処理に失敗しました。もう一度お試しください。" });
+    console.error("エラー:", error);
+    // エラーの中身を画面に詳しく出すようにして、原因を特定しやすくします
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 
