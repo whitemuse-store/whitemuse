@@ -1,13 +1,10 @@
 const express = require('express');
-const Replicate = require('replicate');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const path = require('path');
 
 const app = express();
-// 50枚の一括処理に耐えられるよう、データの通り道を広げます
 app.use(express.json({ limit: '100mb' }));
 
-const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.get('/', (req, res) => {
@@ -16,43 +13,54 @@ app.get('/', (req, res) => {
 
 app.post('/api/process', async (req, res) => {
   try {
-    const { image_url } = req.body;
+    const { image_url, bg_type } = req.body;
     if (!image_url) throw new Error("画像が届いていません");
 
-    // 1. 【背景削除】最新かつ非常に安定した公式モデルを使用
-    // 被写体の輪郭を正確に残し、背景を透過・白化します
-    const editedImage = await replicate.run(
-      "lucataco/remove-bg:95fcc2a21d565684d2a43a8b5d4bc46197e33da0c68230a5ca54bc7030ce8741",
-      { input: { image: image_url } }
-    );
-
-    // 2. 【鑑定・執筆】Gemini 2.0 Flash
+    // 使用モデルを Gemini 2.0 Flash (または最新の Flash Image モデル) に設定
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const base64Data = image_url.split(',')[1];
-    
-    const prompt = `あなたは高級ブランド専門の鑑定士です。画像の商品を分析し、以下を日本語で出力してください。
-    【鑑定】ブランド名、モデル名、素材、色
-    【出品文】プロらしい上品な紹介文（使用感があれば正直に）
-    【推定価格】現在の市場相場に基づく価格帯
-    ※誠実に、見たままを記述してください。`;
 
+    // 背景の指定を Gemini 向けの命令に変換
+    let bgInstruction = bg_type === 'white' ? "pure plain white background" : bg_type;
+
+    // 【命令】背景だけを変え、被写体は1ミリも変えずに、鑑定文と一緒に返して
+    const prompt = `
+      【画像編集命令】
+      1. 被写体（バッグ・時計・宝飾品）の形状、質感、細部を100%維持してください。
+      2. 背景のみを「${bgInstruction}」に差し替えた画像を出力してください。
+      
+      【鑑定・執筆命令】
+      3. 画像の商品を分析し、以下を日本語でテキスト出力してください。
+         - ブランド名・モデル名・素材
+         - 高級感のある出品用紹介文
+         - 市場相場に基づく推定価格
+    `;
+
+    // Gemini に画像と文章を同時に生成させる
     const result = await model.generateContent([
-      prompt,
-      { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+      {
+        inlineData: { mimeType: "image/jpeg", data: base64Data }
+      },
+      { text: prompt }
     ]);
 
-    res.json({ 
-      ok: true, 
-      edited_image: editedImage, 
-      description: result.response.text() 
-    });
+    const response = await result.response;
+    
+    // Gemini から返ってきた「文章」と「新しく作られた画像」を取り出す
+    const description = response.text();
+    // Gemini 2.0以降では response.candidates[0].content.parts から画像データが取得可能
+    const generatedImagePart = response.candidates[0].content.parts.find(p => p.inlineData);
+    const edited_image = generatedImagePart 
+      ? `data:image/jpeg;base64,${generatedImagePart.inlineData.data}` 
+      : image_url; // 万が一画像生成に失敗した場合は元の画像を表示
+
+    res.json({ ok: true, edited_image: edited_image, description: description });
 
   } catch (error) {
-    console.error("エラー:", error);
-    // エラーの中身を画面に詳しく出すようにして、原因を特定しやすくします
-    res.status(500).json({ ok: false, error: error.message });
+    console.error(error);
+    res.status(500).json({ ok: false, error: "Gemini処理エラー: " + error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`WhiteMuse 稼働中`));
+app.listen(PORT, () => console.log(`WhiteMuse Gemini-Native 稼働中`));
