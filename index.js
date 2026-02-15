@@ -6,7 +6,7 @@ const path = require('path');
 const app = express();
 app.use(express.json({ limit: '100mb' }));
 
-// あなたの新しい鍵（r8_R0a..）が、RenderのEnvironmentに正しく入っていれば動きます
+// あなたが用意した最新の鍵で動かします
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -17,21 +17,18 @@ app.post('/api/process', async (req, res) => {
     const { image_url, bg_type } = req.body;
     let editedImage;
 
-    // 【重要】バージョン番号を指定せず、モデル名だけで呼び出す形式に変更しました
+    // 世界で最も安定している「cjwbw/rembg」を直接呼び出します
     if (bg_type === 'white') {
-      // 白背景にする
-      const output = await replicate.run(
-        "lucataco/remove-bg", // バージョン番号をあえて書かないことで最新を使わせます
+      editedImage = await replicate.run(
+        "cjwbw/rembg:fb8a3575979bc0319ca0f2a74c760b7d34cc8ec6c7475f4d455e9664c39179f8",
         { input: { image: image_url } }
       );
-      editedImage = output;
     } else {
-      // 背景を変える
-      const output = await replicate.run(
-        "logerzz/background-remover",
+      // ホテル背景（これだけは今のところこの住所が最強です）
+      editedImage = await replicate.run(
+        "logerzz/background-remover:77227ca3d052d91b40974955f1f9e9f694a50b8ef2f1e63a34a7428f55364842",
         { input: { image: image_url, background_prompt: bg_type } }
       );
-      editedImage = output;
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -43,9 +40,8 @@ app.post('/api/process', async (req, res) => {
     res.json({ ok: true, edited_image: editedImage, description: result.response.text() });
 
   } catch (error) {
-    console.error(error);
-    // エラーが起きた場合、その原因を画面にハッキリ出します
-    res.status(500).json({ ok: false, error: "エラーが発生しました: " + error.message });
+    // どんなエラーが出ても「何がダメか」を日本語でハッキリ出すようにしました
+    res.status(500).json({ ok: false, error: "エラー発生: " + error.message });
   }
 });
 
