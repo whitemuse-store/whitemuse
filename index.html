@@ -5,23 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhiteMuse v1.0</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; text-align: center; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        button { background: #000; color: white; border: none; padding: 18px; border-radius: 35px; cursor: pointer; font-size: 18px; width: 100%; font-weight: bold; }
-        #status { margin: 20px 0; font-size: 14px; color: #666; }
-        .result-item { background: #fff; margin-top: 20px; padding: 15px; border-radius: 15px; text-align: left; border: 1px solid #eee; }
-        .error-item { color: red; background: #fff1f1; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 12px; }
-        img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
-        p { line-height: 1.6; font-size: 14px; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 20px; margin: 0; }
+        .container { max-width: 600px; margin: auto; }
+        .header { background: white; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 24px; letter-spacing: 2px; }
+        .upload-btn { background: #000; color: white; border: none; padding: 20px; border-radius: 40px; cursor: pointer; font-size: 18px; width: 100%; font-weight: bold; margin-top: 20px; }
+        #status { margin: 15px 0; font-size: 14px; color: #007bff; font-weight: bold; }
+        .result-card { background: white; margin-bottom: 20px; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .result-card img { width: 100%; border-radius: 15px; margin-bottom: 15px; background: #eee; }
+        .result-text { font-size: 14px; line-height: 1.6; color: #333; white-space: pre-wrap; }
+        .error-msg { color: #dc3545; background: #fff5f5; padding: 10px; border-radius: 10px; font-size: 13px; margin-top: 5px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>WhiteMuse v1.0</h1>
-        <p>ブランド品を撮影してアップロード</p>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
-        <button onclick="document.getElementById('fileInput').click()">📷 写真をアップロード</button>
-        <div id="status"></div>
+    <div class="container">
+        <div class="header">
+            <h1>WhiteMuse v1.0</h1>
+            <p style="color:#666;">最高50枚まで一括鑑定・編集</p>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📷 写真を選択して開始</button>
+            <div id="status"></div>
+        </div>
         <div id="results"></div>
     </div>
 
@@ -31,12 +35,13 @@
         const results = document.getElementById('results');
 
         fileInput.onchange = async (e) => {
-            const files = e.target.files;
+            const files = Array.from(e.target.files);
             if (files.length === 0) return;
-            results.innerHTML = ''; // 前の結果をクリア
+            
+            status.innerText = `準備中... (全 ${files.length} 枚)`;
             
             for (let i = 0; i < files.length; i++) {
-                status.innerText = `${i + 1} / ${files.length} 枚目を処理中...`;
+                status.innerText = `処理中: ${i + 1} / ${files.length} 枚目...`;
                 const base64 = await toBase64(files[i]);
                 
                 try {
@@ -48,21 +53,21 @@
                     const data = await response.json();
                     
                     if (data.ok) {
-                        const item = document.createElement('div');
-                        item.className = 'result-item';
-                        item.innerHTML = `<img src="${data.edited_image}"><p>${data.description.replace(/\n/g, '<br>')}</p>`;
-                        results.prepend(item);
+                        const div = document.createElement('div');
+                        div.className = 'result-card';
+                        div.innerHTML = `<img src="${data.edited_image}"><div class="result-text">${data.description}</div>`;
+                        results.prepend(div);
                     } else {
-                        throw new Error(data.error || "原因不明のエラー");
+                        throw new Error(data.error);
                     }
                 } catch (err) {
-                    const errItem = document.createElement('div');
-                    errItem.className = 'error-item';
-                    errItem.innerText = `❌ ${i+1}枚目失敗: ${err.message}`;
-                    results.prepend(errItem);
+                    const errDiv = document.createElement('div');
+                    errDiv.className = 'error-msg';
+                    errDiv.innerText = `❌ ${i+1}枚目: ${err.message}`;
+                    results.prepend(errDiv);
                 }
             }
-            status.innerText = "すべての処理が終了しました。";
+            status.innerText = `✨ ${files.length}枚すべての処理が完了しました！`;
         };
 
         const toBase64 = file => new Promise((resolve, reject) => {
