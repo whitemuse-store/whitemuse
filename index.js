@@ -6,9 +6,12 @@ const path = require('path');
 const app = express();
 app.use(express.json({ limit: '100mb' }));
 
-// 鍵を自動で掃除して読み込みます
-const replicate = new Replicate({ auth: (process.env.REPLICATE_API_TOKEN || "").trim() });
-const genAI = new GoogleGenerativeAI((process.env.GEMINI_API_KEY || "").trim());
+// 鍵の空白を徹底的に掃除して読み込みます
+const repToken = (process.env.REPLICATE_API_TOKEN || "").trim();
+const gemKey = (process.env.GEMINI_API_KEY || "").trim();
+
+const replicate = new Replicate({ auth: repToken });
+const genAI = new GoogleGenerativeAI(gemKey);
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
 
@@ -17,16 +20,16 @@ app.post('/api/process', async (req, res) => {
     const { image_url, bg_type } = req.body;
     let editedImage;
 
-    // 【解決策】長い英数字（バージョン）を消して、モデル名だけで呼び出します。
-    // これでReplicateが「今動く最新版」を勝手に選んでくれるので、住所エラーは起きません。
+    // バージョン番号（長い英数字）を使わず、モデル名だけで呼び出します。
+    // これが2026年現在の、最も「住所エラー（422）」が起きにくい公式推奨の書き方です。
     if (bg_type === 'white') {
       editedImage = await replicate.run(
-        "cjwbw/rembg", // 白背景専用
+        "lucataco/remove-bg", 
         { input: { image: image_url } }
       );
     } else {
       editedImage = await replicate.run(
-        "logerzz/background-remover", // 高級ホテルなど
+        "logerzz/background-remover",
         { input: { image: image_url, background_prompt: bg_type } }
       );
     }
@@ -40,9 +43,11 @@ app.post('/api/process', async (req, res) => {
     res.json({ ok: true, edited_image: editedImage, description: result.response.text() });
 
   } catch (error) {
-    res.status(500).json({ ok: false, error: "AIへの注文でエラー: " + error.message });
+    // ログに詳細を書き残すようにしました。失敗したら「Logs」を見てください。
+    console.error("【重大エラー】", error.message);
+    res.status(500).json({ ok: false, error: "AIエラー: " + error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`WhiteMuse 稼働開始`));
+app.listen(PORT, () => console.log(`WhiteMuse 最終起動`));
