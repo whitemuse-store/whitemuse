@@ -1,11 +1,13 @@
 const express = require('express');
+const Replicate = require('replicate');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const path = require('path');
 
 const app = express();
 app.use(express.json({ limit: '100mb' }));
 
-// Geminiの鍵だけで動かします
+// お金（数十円〜数百円）を払って、最高の職人と爆速の脳を雇います
+const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.get('/', (req, res) => {
@@ -15,50 +17,43 @@ app.get('/', (req, res) => {
 app.post('/api/process', async (req, res) => {
   try {
     const { image_url, bg_type } = req.body;
+    if (!image_url) throw new Error("画像が届いていません");
+
+    // 1. 【背景処理】Replicate（専門職人・絶対に形を変えない）
+    let editedImage;
+    if (bg_type === 'white') {
+      editedImage = await replicate.run(
+        "lucataco/remove-bg:95fcc2a21d565684d2a43a8b5d4bc46197e33da0c68230a5ca54bc7030ce8741",
+        { input: { image: image_url } }
+      );
+    } else {
+      editedImage = await replicate.run(
+        "logerzz/background-remover:77227ca3d052d91b40974955f1f9e9f694a50b8ef2f1e63a34a7428f55364842",
+        { input: { image: image_url, background_prompt: bg_type } }
+      );
+    }
+
+    // 2. 【鑑定・執筆】Gemini API 有料枠（爆速のコンサルタント）
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const base64Data = image_url.split(',')[1];
-
-    // Gemini 2.5 Flash (画像編集と文章作成の両方が得意なモデル)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    const bgInstruction = bg_type === 'white' ? "純粋な真っ白な背景(pure white background)" : bg_type;
-
-    // 命令：背景を変えて、かつ鑑定もして
-    const prompt = `
-      あなたは高級ブランド鑑定士兼、画像編集プロフェッショナルです。
-      
-      【画像編集】
-      ・被写体（バッグ・時計・ジュエリー）の形、ロゴ、質感を1ミリも変えないでください。
-      ・背景のみを「${bgInstruction}」に完璧に描き換えた画像を生成してください。
-      
-      【鑑定執筆】
-      ・商品のブランド名、モデル名、素材を特定してください。
-      ・プロらしい上品な日本語の出品文を書いてください。
-      ・現在の市場価格の目安を教えてください。
-    `;
+    
+    const prompt = `あなたは高級ブランド専門の鑑定士です。画像の商品を分析し、以下を日本語で出力してください。
+    【鑑定】ブランド名、モデル名、素材、色
+    【出品文】プロらしい上品な紹介文（使用感があれば正直に）
+    【推定価格】市場相場に基づく価格帯`;
 
     const result = await model.generateContent([
-      { inlineData: { mimeType: "image/jpeg", data: base64Data } },
-      { text: prompt }
+      prompt,
+      { inlineData: { mimeType: "image/jpeg", data: base64Data } }
     ]);
 
-    const response = await result.response;
-    const text = response.text();
-    
-    // Geminiが生成した画像データを取り出す
-    const generatedImagePart = response.candidates[0].content.parts.find(p => p.inlineData);
-    const edited_image = generatedImagePart 
-      ? `data:image/jpeg;base64,${generatedImagePart.inlineData.data}` 
-      : image_url; // 編集に失敗した場合は元の画像を表示
-
-    res.json({ ok: true, edited_image: edited_image, description: text });
+    res.json({ ok: true, edited_image: editedImage, description: result.response.text() });
 
   } catch (error) {
-    console.error(error);
-    // 429エラー（混雑）のときはユーザーに優しく伝えます
-    const errorMsg = error.message.includes("429") ? "現在無料枠が混み合っています。少し待って自動で再開します。" : error.message;
-    res.status(500).json({ ok: false, error: errorMsg });
+    console.error("エラー:", error);
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`WhiteMuse 完全無料版 稼働中`));
+app.listen(PORT, () => console.log(`WhiteMuse 究極のハイブリッド版 稼働中`));
