@@ -1,656 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>WhiteMuse</title>
-  <style>
-    :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --brand:#6d28d9;
-      --brand2:#7c3aed;
-      --ok:#059669;
-      --warn:#b45309;
-      --err:#b91c1c;
-      --shadow: 0 10px 25px rgba(17,24,39,.08);
-      --radius: 18px;
-      --btnradius: 12px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:var(--sans);
-      background:linear-gradient(180deg,#fff 0%, var(--bg) 70%);
-      color:var(--text);
-    }
-    header{
-      position:sticky; top:0; z-index:5;
-      backdrop-filter:saturate(140%) blur(10px);
-      background:rgba(255,255,255,.75);
-      border-bottom:1px solid var(--line);
-    }
-    .wrap{max-width:1200px;margin:0 auto;padding:16px 16px 40px}
-    .topbar{display:flex;align-items:center;gap:14px;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px}
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
-    .title{font-weight:800;letter-spacing:.2px}
-    .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
-    .righttools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 12px;border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-size:12px;color:var(--muted);
-      box-shadow:0 4px 14px rgba(17,24,39,.05);
-    }
-    .pill strong{color:var(--text)}
-    .pill.ok{border-color:rgba(5,150,105,.25); color:var(--ok)}
-    .pill.ng{border-color:rgba(185,28,28,.25); color:var(--err)}
-    .btn{
-      border:1px solid var(--line);
-      background:#fff;
-      padding:10px 12px;
-      border-radius:var(--btnradius);
-      cursor:pointer;
-      font-weight:700;
-      color:var(--text);
-      box-shadow:0 6px 18px rgba(17,24,39,.06);
-    }
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{
-      background:linear-gradient(135deg,var(--brand) 0%, var(--brand2) 100%);
-      border-color:transparent;color:#fff;
-    }
-    .btn.ghost{background:#fff}
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:18px;
-      margin-top:18px;
-    }
-    @media (max-width: 980px){
-      .grid{grid-template-columns:1fr}
-      .righttools{justify-content:flex-start}
-    }
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:16px;
-    }
-    .card h2{
-      font-size:16px;margin:0 0 12px;
-      display:flex;align-items:center;gap:10px
-    }
-    .hint{font-size:12px;color:var(--muted);font-weight:600}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .field{
-      display:flex;flex-direction:column;gap:6px;
-      margin-bottom:10px;
-      flex:1;
-      min-width: 220px;
-    }
-    label{font-size:12px;color:var(--muted);font-weight:700}
-    input, select, textarea{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:11px 12px;
-      font-size:14px;
-      outline:none;
-      background:#fff;
-    }
-    textarea{min-height:88px;resize:vertical}
-    .idbox{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:10px;
-      padding:10px 12px;
-      border:1px dashed rgba(109,40,217,.35);
-      background:rgba(109,40,217,.05);
-      border-radius:14px;
-      font-family:var(--mono);
-      font-size:12px;
-    }
-    .actions{
-      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
-    }
-    .seg{
-      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
-    }
-    .seg select{max-width:240px}
-    .previewGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-    @media (max-width: 520px){
-      .previewGrid{grid-template-columns:1fr}
-    }
-    .ph{
-      border:1px dashed var(--line);
-      border-radius:16px;
-      background:linear-gradient(180deg,#fff 0%, #fafafa 100%);
-      min-height:220px;
-      display:flex;align-items:center;justify-content:center;
-      color:var(--muted);
-      position:relative;
-      overflow:hidden;
-    }
-    .ph img{width:100%;height:100%;object-fit:contain;background:#fff}
-    .ph small{
-      position:absolute;top:10px;right:10px;
-      background:#fff;border:1px solid var(--line);
-      border-radius:999px;
-      padding:6px 10px;font-size:11px;color:var(--muted);
-    }
-    .textout{
-      margin-top:12px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      min-height:110px;
-      background:#fff;
-      white-space:pre-wrap;
-    }
-    .mini{
-      font-size:12px;color:var(--muted);
-      margin-top:8px;
-    }
-    .danger{
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(185,28,28,.25);
-      background:rgba(185,28,28,.06);
-      color:#7f1d1d;
-      font-size:12px;
-      display:none;
-      white-space:pre-wrap;
-    }
-    .footerNote{
-      margin-top:18px;
-      font-size:12px;color:var(--muted)
-    }
-    .tinyBtns{
-      display:flex;gap:10px;flex-wrap:wrap;margin-top:10px
-    }
-    .btn.small{padding:9px 10px;font-size:12px;border-radius:12px}
-    .muted{color:var(--muted)}
-    .kbd{
-      font-family:var(--mono);
-      border:1px solid var(--line);
-      border-bottom-width:2px;
-      padding:1px 6px;
-      border-radius:8px;
-      background:#fff;
-      font-size:12px;
-      color:var(--muted);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhiteMuse v1.0</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; text-align: center; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        button { background: #000; color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-size: 16px; width: 100%; }
+        #status { margin-top: 20px; font-weight: bold; color: #555; }
+        .result-item { background: #fff; margin-top: 20px; padding: 15px; border-radius: 10px; text-align: left; border: 1px solid #ddd; }
+        img { max-width: 100%; border-radius: 10px; }
+    </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <div class="dot"></div>
-        <div>
-          <div class="title">WhiteMuse</div>
-          <div class="subtitle">画像生成 / 文章生成 / 商品管理ID / 売れたら取り消し（v1.0）</div>
-        </div>
-      </div>
-
-      <div class="righttools">
-        <div id="apiPill" class="pill ng"><strong>API:</strong> 未確認</div>
-        <button class="btn small" id="btnPing">接続チェック</button>
-        <button class="btn small" id="btnReset">リセット</button>
-      </div>
-    </div>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="grid">
     <div class="card">
-      <h2>出品セット作成 <span class="hint">（ここだけ触ればOK）</span></h2>
-
-      <div class="row">
-        <div class="field">
-          <label>ブランド</label>
-          <select id="brand">
-            <option>CHANEL</option>
-            <option>HERMES</option>
-            <option>LOUIS VUITTON</option>
-            <option>DIOR</option>
-            <option>GUCCI</option>
-            <option>PRADA</option>
-            <option>CELINE</option>
-            <option>FENDI</option>
-            <option>BOTTEGA VENETA</option>
-            <option>OTHERS</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>モデル（例：マトラッセ / ガーデンパーティ / ネヴァーフル）</label>
-          <input id="model" placeholder="例：マトラッセ 25 / ダイアナ / ピコタンPM" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label>色</label>
-          <input id="color" placeholder="例：ブラック / エトゥープ / グレー" />
-        </div>
-        <div class="field">
-          <label>素材</label>
-          <input id="material" placeholder="例：ラムスキン / キャビア / トゴ" />
-        </div>
-      </div>
-
-      <div class="field">
-        <label>状態（短く）</label>
-        <input id="condition" placeholder="例：角スレ少 / 型崩れ軽 / 内側汚れ少" />
-      </div>
-
-      <div class="field">
-        <label>追加指示（必要な時だけ）</label>
-        <textarea id="extra" placeholder="例：富裕層向け / 海外向け / 背景は高級ホテルラウンジ風（※商品はAIに描かせない）"></textarea>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label>販売（文章のトーン自動切替）</label>
-          <select id="tone">
-            <option value="mercari_fast">メルカリ（即売れ）</option>
-            <option value="mercari_premium">メルカリ（プレミア強め）</option>
-            <option value="yahoo">ヤフオク</option>
-            <option value="rakuma">ラクマ</option>
-            <option value="b2b">BtoB（業者向け）</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>同時出品（半自動）</label>
-          <div class="tinyBtns">
-            <button class="btn small" id="openMercari">メルカリを開く</button>
-            <button class="btn small" id="openYahoo">ヤフオクを開く</button>
-            <button class="btn small" id="openRakuma">ラクマを開く</button>
-          </div>
-          <div class="mini">※ “開く” だけ（自動投稿はしません）</div>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn primary" id="btnAll">① 画像＋文章 まとめて生成</button>
-        <button class="btn" id="btnImg">画像だけ</button>
-        <button class="btn" id="btnText">文章だけ</button>
-      </div>
-
-      <div class="footerNote">
-        ✅ まずは <span class="kbd">接続チェック</span> → <span class="kbd">文章だけ</span> の順に動作確認がおすすめ。<br/>
-        （Render Free は最初だけ少し待つことがあります）
-      </div>
-
-      <div id="errBox" class="danger"></div>
+        <h1>WhiteMuse v1.0</h1>
+        <p>写真を選択してください（50枚まで）</p>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
+        <button onclick="document.getElementById('fileInput').click()">📷 写真をアップロード</button>
+        <div id="status"></div>
+        <div id="results"></div>
     </div>
 
-    <div class="card">
-      <h2>プレビュー <span class="hint" id="statusHint">待機中</span></h2>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
 
-      <div class="idbox">
-        <div>管理ID：<span id="wmid">WM-0000</span></div>
-        <button class="btn small" id="copyId">IDをコピー</button>
-      </div>
+        fileInput.onchange = async (e) => {
+            const files = e.target.files;
+            if (files.length === 0) return;
 
-      <div class="previewGrid">
-        <div class="ph" id="ph1">
-          <small>画像（白背景EC / 生成後に表示）</small>
-          <div class="muted">ここに表示</div>
-        </div>
-        <div class="ph" id="ph2">
-          <small>背景アレンジ（必要な時だけ / 生成後に表示）</small>
-          <div class="muted">ここに表示</div>
-        </div>
-      </div>
+            status.innerText = `${files.length}枚の処理を開始します...`;
+            
+            for (let i = 0; i < files.length; i++) {
+                status.innerText = `${i + 1} / ${files.length} 枚目を処理中...`;
+                
+                // 画像をネット上のURLに変換する代わりに、今回は簡易的にBase64で送る仕組み
+                // ※本来はS3等が必要ですが、まずは動かすために直送します
+                const base64 = await toBase64(files[i]);
+                
+                try {
+                    const response = await fetch('/api/process', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image_url: base64 })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.ok) {
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `<img src="${data.edited_image}"><p>${data.description.replace(/\n/g, '<br>')}</p><hr>`;
+                        results.prepend(item);
+                    }
+                } catch (err) {
+                    console.error("エラー:", err);
+                }
+            }
+            status.innerText = "すべての処理が完了しました！";
+        };
 
-      <div style="margin-top:12px;font-weight:800;font-size:13px;color:var(--muted);">
-        生成された文章（コピーして出品欄へ）
-      </div>
-      <div id="textOut" class="textout">ここに文章が出ます</div>
-
-      <div class="actions">
-        <button class="btn" id="copyText">文章をコピー</button>
-      </div>
-
-      <div class="mini">
-        🔧 うまくいかない時は「エラーの赤い箱」に “本当の原因” を出すようにしてあります。<br/>
-        それをそのまま貼ってくれれば一発で直せます。
-      </div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:18px">
-    <h2>売れた通知（v1.0：手動登録 → 取り消しだけ最短） <span class="hint">（今は未実装でもOK）</span></h2>
-    <div class="mini">
-      v1.0 では “売れたら取り消し” を最短で入れるため、まずは土台だけ置いてあります。<br/>
-      （ここは後で一気に作ります）
-    </div>
-  </div>
-</div>
-
-<script>
-/**
- * ✅ ここだけ超重要
- * あなたの API の URL（今動いてるやつ）
- */
-const API_BASE = "https://whitemuse-api.onrender.com"; // ← これで固定
-
-// ---------- helpers ----------
-const $ = (id) => document.getElementById(id);
-const apiPill = $("apiPill");
-const errBox = $("errBox");
-const statusHint = $("statusHint");
-const textOut = $("textOut");
-const ph1 = $("ph1");
-const ph2 = $("ph2");
-
-function showErr(msg){
-  errBox.style.display = "block";
-  errBox.textContent = msg;
-}
-function clearErr(){
-  errBox.style.display = "none";
-  errBox.textContent = "";
-}
-function setHint(t){ statusHint.textContent = t; }
-
-function newId(){
-  const n = Math.floor(Math.random()*9000)+1000;
-  return "WM-" + n;
-}
-function setId(id){ $("wmid").textContent = id; }
-
-function resetUI(){
-  clearErr();
-  setHint("待機中");
-  textOut.textContent = "ここに文章が出ます";
-  ph1.innerHTML = '<small>画像（白背景EC / 生成後に表示）</small><div class="muted">ここに表示</div>';
-  ph2.innerHTML = '<small>背景アレンジ（必要な時だけ / 生成後に表示）</small><div class="muted">ここに表示</div>';
-  setId(newId());
-}
-
-function payload(){
-  return {
-    id: $("wmid").textContent,
-    brand: $("brand").value,
-    model: $("model").value.trim(),
-    color: $("color").value.trim(),
-    material: $("material").value.trim(),
-    condition: $("condition").value.trim(),
-    extra: $("extra").value.trim(),
-    tone: $("tone").value
-  };
-}
-
-/**
- * ✅ “どのAPIパスが正解か” がズレても動くように、
- * いくつかの候補を順番に試します。
- */
-async function postWithFallback(paths, bodyObj){
-  let lastErr = null;
-
-  for (const p of paths){
-    const url = API_BASE.replace(/\/$/,"") + p;
-    try{
-      const res = await fetch(url, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(bodyObj)
-      });
-
-      // 404/405 は「そのパスが無い」可能性が高いので次へ
-      if (res.status === 404 || res.status === 405){
-        lastErr = new Error(`Not found: ${p} (${res.status})`);
-        continue;
-      }
-
-      const text = await res.text();
-      let json = null;
-      try{ json = JSON.parse(text); }catch(e){}
-
-      if (!res.ok){
-        // 200以外の時は詳細を出す
-        throw new Error(`HTTP ${res.status} @ ${p}\n` + (json ? JSON.stringify(json,null,2) : text));
-      }
-
-      // 成功（JSONで返ればJSON、文字なら文字）
-      return json ?? { ok:true, raw:text };
-
-    }catch(e){
-      lastErr = e;
-      continue;
-    }
-  }
-
-  throw lastErr ?? new Error("API call failed");
-}
-
-/** GET 確認（/ と /health を試す） */
-async function ping(){
-  clearErr();
-  apiPill.className = "pill ng";
-  apiPill.innerHTML = "<strong>API:</strong> 確認中…";
-
-  const candidates = ["/", "/health", "/ping"];
-  let ok = false;
-  let last = null;
-
-  for (const p of candidates){
-    const url = API_BASE.replace(/\/$/,"") + p;
-    try{
-      const res = await fetch(url, { method:"GET" });
-      const t = await res.text();
-      if (res.ok){
-        ok = true;
-        // “WhiteMuse API is running” でもOK
-        break;
-      } else {
-        last = `HTTP ${res.status} @ ${p}\n${t}`;
-      }
-    }catch(e){
-      last = String(e);
-    }
-  }
-
-  if (ok){
-    apiPill.className = "pill ok";
-    apiPill.innerHTML = "<strong>API:</strong> OK";
-    return true;
-  }else{
-    apiPill.className = "pill ng";
-    apiPill.innerHTML = "<strong>API:</strong> NG";
-    showErr("APIに接続できません。\n\n" +
-      "・Render Free だと起動に最大50秒かかることがあります\n" +
-      "・少し待ってからもう一度「接続チェック」\n\n" +
-      (last ? ("---- 詳細 ----\n"+last) : "")
-    );
-    return false;
-  }
-}
-
-function setImage(el, url){
-  el.innerHTML = '<small>表示中</small><img alt="" />';
-  el.querySelector("img").src = url;
-}
-
-// ---------- actions ----------
-async function runText(){
-  clearErr();
-  setHint("文章生成中…（少し待ってOK）");
-
-  // 文章生成の候補パス
-  const paths = [
-    "/generate/text",
-    "/text",
-    "/generateText",
-    "/api/generate/text",
-    "/api/text",
-    "/generate"
-  ];
-
-  const data = await postWithFallback(paths, { ...payload(), mode:"text" });
-
-  // よくある返し方を吸収
-  const out =
-    data.text ||
-    data.description ||
-    data.result ||
-    (data.raw ? String(data.raw) : "");
-
-  if (!out) throw new Error("文章が空で返ってきました（APIの返却形式が違う可能性）\n" + JSON.stringify(data,null,2));
-
-  textOut.textContent = out;
-  setHint("文章生成：完了 ✅");
-}
-
-async function runImage(){
-  clearErr();
-  setHint("画像生成中…（最初だけ少し待つことがあります）");
-
-  // 画像生成の候補パス
-  const paths = [
-    "/generate/image",
-    "/image",
-    "/generateImage",
-    "/api/generate/image",
-    "/api/image",
-    "/generate"
-  ];
-
-  const data = await postWithFallback(paths, { ...payload(), mode:"image" });
-
-  // 返却候補
-  const img1 = data.imageUrl || data.image_url || (data.images && data.images[0]) || data.image;
-  const img2 = data.bgUrl || data.bg_url || (data.images && data.images[1]) || data.background;
-
-  if (!img1){
-    throw new Error("画像URLが返ってきませんでした（APIの返却形式が違う可能性）\n" + JSON.stringify(data,null,2));
-  }
-
-  setImage(ph1, img1);
-  if (img2) setImage(ph2, img2);
-
-  setHint("画像生成：完了 ✅");
-}
-
-async function runAll(){
-  clearErr();
-  setHint("まとめて生成中…（少し待ってOK）");
-
-  // まとめ生成の候補パス
-  const paths = [
-    "/generate/all",
-    "/generate/bundle",
-    "/bundle",
-    "/all",
-    "/generateAll",
-    "/api/generate/all",
-    "/api/bundle",
-    "/generate"
-  ];
-
-  const data = await postWithFallback(paths, { ...payload(), mode:"all" });
-
-  const out =
-    data.text ||
-    data.description ||
-    data.resultText ||
-    data.result ||
-    "";
-
-  const img1 = data.imageUrl || data.image_url || (data.images && data.images[0]) || data.image;
-  const img2 = data.bgUrl || data.bg_url || (data.images && data.images[1]) || data.background;
-
-  if (out) textOut.textContent = out;
-  if (img1) setImage(ph1, img1);
-  if (img2) setImage(ph2, img2);
-
-  // どっちも無いときはエラー
-  if (!out && !img1){
-    throw new Error("文章も画像も返ってきませんでした（APIの返却形式が違う可能性）\n" + JSON.stringify(data,null,2));
-  }
-
-  setHint("まとめて生成：完了 ✅");
-}
-
-function copyToClipboard(txt){
-  navigator.clipboard.writeText(txt).catch(()=>{});
-}
-
-// ---------- wire ----------
-$("btnReset").addEventListener("click", resetUI);
-$("btnPing").addEventListener("click", ping);
-
-$("btnText").addEventListener("click", async ()=>{
-  try{
-    const ok = await ping();
-    if(!ok) return;
-    await runText();
-  }catch(e){
-    showErr("文章生成に失敗しました。\n\n---- 詳細 ----\n" + (e && e.message ? e.message : String(e)));
-    setHint("エラー");
-  }
-});
-
-$("btnImg").addEventListener("click", async ()=>{
-  try{
-    const ok = await ping();
-    if(!ok) return;
-    await runImage();
-  }catch(e){
-    showErr("画像生成に失敗しました。\n\n---- 詳細 ----\n" + (e && e.message ? e.message : String(e)));
-    setHint("エラー");
-  }
-});
-
-$("btnAll").addEventListener("click", async ()=>{
-  try{
-    const ok = await ping();
-    if(!ok) return;
-    await runAll();
-  }catch(e){
-    showErr("まとめて生成に失敗しました。\n\n---- 詳細 ----\n" + (e && e.message ? e.message : String(e)));
-    setHint("エラー");
-  }
-});
-
-$("copyText").addEventListener("click", ()=>{
-  copyToClipboard(textOut.textContent || "");
-  setHint("文章をコピーしました ✅");
-  setTimeout(()=>setHint("待機中"), 900);
-});
-$("copyId").addEventListener("click", ()=>{
-  copyToClipboard($("wmid").textContent || "");
-  setHint("IDをコピーしました ✅");
-  setTimeout(()=>setHint("待機中"), 900);
-});
-
-$("openMercari").addEventListener("click", ()=>window.open("https://www.mercari.com/jp/sell/", "_blank"));
-$("openYahoo").addEventListener("click", ()=>window.open("https://auctions.yahoo.co.jp/sell/jp/show/top", "_blank"));
-$("openRakuma").addEventListener("click", ()=>window.open("https://fril.jp/sell", "_blank"));
-
-// 初期化
-resetUI();
-// 最初に一度だけ自動で接続チェック（Renderが寝てたら起きる）
-setTimeout(()=>{ ping(); }, 400);
-</script>
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    </script>
 </body>
 </html>
